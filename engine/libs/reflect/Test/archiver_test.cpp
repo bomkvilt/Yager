@@ -5,7 +5,7 @@
 #include <boost/algorithm/string/replace.hpp>
 
 
-struct archiver_tests : public testing::Test
+struct reflect_archiver_tests : public testing::Test
 {
 	reflect::Archiver archive;
 
@@ -27,7 +27,7 @@ struct archiver_tests : public testing::Test
 };
 
 
-TEST_F(archiver_tests, simple_load)
+TEST_F(reflect_archiver_tests, simple_load)
 {
 	archive.Load( R"({"a": "gg"})");
 	auto probe = std::string();
@@ -35,14 +35,14 @@ TEST_F(archiver_tests, simple_load)
 	EXPECT_EQ(probe, "gg");
 }
 
-TEST_F(archiver_tests, simple_write)
+TEST_F(reflect_archiver_tests, simple_write)
 {
 	auto probe = std::string("wp");
 	auto json = Probe(probe, "aa");
 	EXPECT_EQ(json, R"({"aa":"wp"})");
 }
 
-TEST_F(archiver_tests, simple_int)
+TEST_F(reflect_archiver_tests, simple_int)
 {
 	auto probe = int(10);
 	auto json = Probe(probe, "aa");
@@ -53,7 +53,7 @@ TEST_F(archiver_tests, simple_int)
 	EXPECT_EQ(result, probe);
 }
 
-TEST_F(archiver_tests, simple_bool)
+TEST_F(reflect_archiver_tests, simple_bool)
 {
 	auto probe = true;
 	auto json = Probe(probe, "aa");
@@ -64,7 +64,7 @@ TEST_F(archiver_tests, simple_bool)
 	EXPECT_EQ(result, probe);
 }
 
-TEST_F(archiver_tests, simple_float)
+TEST_F(reflect_archiver_tests, simple_float)
 {
 	auto probe = float(2.5);
 	auto json = Probe(probe, "aa");
@@ -75,7 +75,7 @@ TEST_F(archiver_tests, simple_float)
 	EXPECT_EQ(result, probe);
 }
 
-TEST_F(archiver_tests, complex_name)
+TEST_F(reflect_archiver_tests, complex_name)
 {
 	auto probe = std::string("ez");
 	auto json = Probe(probe, "aa.b");
@@ -86,7 +86,7 @@ TEST_F(archiver_tests, complex_name)
 	EXPECT_EQ(result, probe);
 }
 
-TEST_F(archiver_tests, unquotted)
+TEST_F(reflect_archiver_tests, unquotted)
 {
 	archive.Load(R"({"aa":10})");
 	auto probe = int(0);
@@ -94,7 +94,7 @@ TEST_F(archiver_tests, unquotted)
 	EXPECT_EQ(probe, 10);
 }
 
-TEST_F(archiver_tests, array)
+TEST_F(reflect_archiver_tests, array)
 {
 	auto probe = std::vector<int>{10, 20};
 	auto json = Probe(probe, "aa");
@@ -105,7 +105,7 @@ TEST_F(archiver_tests, array)
 	EXPECT_EQ(result, probe);
 }
 
-TEST_F(archiver_tests, map)
+TEST_F(reflect_archiver_tests, map)
 {
 	auto probe = std::map<int, std::string>{ { 10, "a"}, {20, "b"} };
 	auto json = Probe(probe, "aa");

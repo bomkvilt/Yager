@@ -5,7 +5,7 @@
 #include <boost/algorithm/string/replace.hpp>
 
 
-struct archived_tests : public testing::Test
+struct reflect_archived_tests : public testing::Test
 {
 	reflect::Archiver archive;
 
@@ -18,7 +18,7 @@ struct archived_tests : public testing::Test
 };
 
 
-TEST_F(archived_tests, simple)
+TEST_F(reflect_archived_tests, simple)
 {
 	struct FTest : public reflect::FArchived
 	{
@@ -33,7 +33,7 @@ TEST_F(archived_tests, simple)
 	EXPECT_EQ(json, R"({"probe":"86"})");
 }
 
-TEST_F(archived_tests, category)
+TEST_F(reflect_archived_tests, category)
 {
 	struct FTest : public reflect::FArchived
 	{
@@ -48,7 +48,7 @@ TEST_F(archived_tests, category)
 	EXPECT_EQ(json, R"({"aa":{"probe":"86"}})");
 }
 
-TEST_F(archived_tests, alt_name)
+TEST_F(reflect_archived_tests, alt_name)
 {
 	struct FTest : public reflect::FArchived
 	{
@@ -63,7 +63,7 @@ TEST_F(archived_tests, alt_name)
 	EXPECT_EQ(json, R"({"aa":"86"})");
 }
 
-TEST_F(archived_tests, array)
+TEST_F(reflect_archived_tests, array)
 {
 	struct FTest : public reflect::FArchived
 	{
@@ -82,7 +82,7 @@ TEST_F(archived_tests, array)
 	EXPECT_EQ(b.probe, a.probe);
 }
 
-TEST_F(archived_tests, archived)
+TEST_F(reflect_archived_tests, archived)
 {
 	struct FTest : public reflect::FArchived
 	{
