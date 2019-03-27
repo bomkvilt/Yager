@@ -3,4 +3,5 @@ GN_Subprojects(
     libs/reflect
     libs/math
     common
+    core
     )
