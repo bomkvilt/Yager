@@ -1,0 +1,3 @@
+#ifndef THREAD_PULL_HPP
+#define THREAD_PULL_HPP
+#endif //!THREAD_PULL_HPP
