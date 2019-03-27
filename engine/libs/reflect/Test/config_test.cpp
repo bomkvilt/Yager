@@ -2,6 +2,7 @@
 #include "config/config.hpp"
 #include <filesystem>
 #include <fstream>
+#include <boost/algorithm/string/replace.hpp>
 
 
 struct reflect_config_tests : public testing::Test

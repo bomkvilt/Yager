@@ -2,9 +2,13 @@
 #define ARCHIVER_HPP
 
 #include <string>
+#include <map>
 #include <vector>
+#include <unordered_map>
+
 #include <boost/noncopyable.hpp>
 #include <boost/property_tree/ptree.hpp>
+
 #include "reflect/archived.hpp"
 
 
