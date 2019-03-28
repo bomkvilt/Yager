@@ -10,7 +10,7 @@ struct FThreadingConfig : public reflect::FConfig
 		ARCH_FIELD(, , threads)
 		ARCH_END();
 
-	int threads = 1;
+	int threads = 0; //!< threads in threadpull | \note: 0 -> (cores-1)
 };
 
 

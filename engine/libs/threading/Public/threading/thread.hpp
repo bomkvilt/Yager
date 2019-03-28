@@ -4,13 +4,11 @@
 #include <thread>
 
 
-class Thread final
+namespace threading
 {
-public:
     using ID = std::thread::id;
-    
-	static ThreadID GetID();
-};
 
+	ID GetThreadID();
+}
 
 #endif //!THREAD_HPP
