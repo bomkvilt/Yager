@@ -33,9 +33,9 @@ public: //--------------| generation
 	TVector(const TVector<Q>& r) : x(r.x), y(r.y), z(r.z)
 	{}
 
-	template<typename Q>
+	/*template<typename Q>
 	TVector(const TVector2<Q>& r) : x(r.x), y(r.y), z(0)
-	{}
+	{}*/
 
 	template<typename Q>
 	SVector& operator=(const TVector<Q>& r) { VECTOR_VECTOR((*this), r, =, STATE); }
