@@ -5,7 +5,7 @@
 #include <boost/algorithm/string/replace.hpp>
 
 
-struct reflect_config_tests : public testing::Test
+struct config_tests : public testing::Test
 {
 	void SetUp() override
 	{
@@ -33,7 +33,7 @@ struct reflect_config_tests : public testing::Test
 	std::filesystem::path path = "./___config_test.json";
 };
 
-TEST_F(reflect_config_tests, simple)
+TEST_F(config_tests, simple)
 {
 	struct Probe : public reflect::FConfig
 	{
