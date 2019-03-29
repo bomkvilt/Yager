@@ -4,5 +4,5 @@ set dir=./build/windows
 if not exist "%dir%" mkdir "%dir%"
 
 pushd "%dir%"
-cmake ../..
+cmake -j8 ../..
 popd
