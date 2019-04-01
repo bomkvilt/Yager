@@ -1,6 +1,9 @@
 #include "threading/thread_context.hpp"
 #include <unordered_map>
-#include "thread.hpp"
+#include "threading/thread.hpp"
+
+
+FEngineConfig ThreadContext::config;
 
 
 void ThreadContext::SetWorld(World* newWorld)
@@ -35,8 +38,8 @@ void ThreadContext::PopInitialiser()
 
 ThreadContext& ThreadContext::Get()
 {
-	using  Contexts = std::unordered_map<Thread::ID, ThreadContext>;
+	using  Contexts = std::unordered_map<threading::ID, ThreadContext>;
 	static Contexts contexts;
-	return contexts[Thread::GetID()];
+	return contexts[threading::GetThreadID()];
 }
 

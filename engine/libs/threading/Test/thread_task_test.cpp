@@ -17,26 +17,26 @@ struct task_tests : public testing::Test
 TEST_F(task_tests, simple)
 {
 	int val = 10;
-	threading::FLambdaTask::New([&](threading::IThreadpool&) { val = 30; })->Run(dummy_pool);
+	threading::FLambdaTask::New([&]() { val = 30; })->Run(dummy_pool);
 	EXPECT_EQ(val, 30);
 }
 
 TEST_F(task_tests, chain)
 {
-	auto a = threading::FLambdaTask::New([&](threading::IThreadpool&) {});
-	auto b = threading::FLambdaTask::New([&](threading::IThreadpool&) {});
-	auto c = threading::FLambdaTask::New([&](threading::IThreadpool&) {});
+	auto a = threading::FLambdaTask::New([&]() {});
+	auto b = threading::FLambdaTask::New([&]() {});
+	auto c = threading::FLambdaTask::New([&]() {});
 	
 	a->Next(c);
 	b->Next(c);
 
-	EXPECT_EQ(a->Prevs(), 0);
-	EXPECT_EQ(b->Prevs(), 0);
-	EXPECT_EQ(c->Prevs(), 2);
+	EXPECT_EQ(a->NPrev(), 0);
+	EXPECT_EQ(b->NPrev(), 0);
+	EXPECT_EQ(c->NPrev(), 2);
 
-	EXPECT_EQ(a->Nexts(), 1);
-	EXPECT_EQ(b->Nexts(), 1);
-	EXPECT_EQ(c->Nexts(), 0);
+	EXPECT_EQ(a->NNext(), 1);
+	EXPECT_EQ(b->NNext(), 1);
+	EXPECT_EQ(c->NNext(), 0);
 }
 
 TEST_F(task_tests, tasks)
@@ -52,10 +52,10 @@ TEST_F(task_tests, tasks)
 	auto outs = std::string();
 	auto pool = TestPool();
 
-	auto a = threading::FLambdaTask::New([&](threading::IThreadpool&) { outs += 'a'; });
-	auto b = threading::FLambdaTask::New([&](threading::IThreadpool&) { outs += 'b'; });
-	auto c = threading::FLambdaTask::New([&](threading::IThreadpool&) { outs += 'c'; });
-	auto h = threading::FLambdaTask::New([&](threading::IThreadpool&) { outs += 'h'; });
+	auto a = threading::FLambdaTask::New([&]() { outs += 'a'; });
+	auto b = threading::FLambdaTask::New([&]() { outs += 'b'; });
+	auto c = threading::FLambdaTask::New([&]() { outs += 'c'; });
+	auto h = threading::FLambdaTask::New([&]() { outs += 'h'; });
 
 	auto s = threading::FTasks::New();
 	s->AddTask(std::move(a));

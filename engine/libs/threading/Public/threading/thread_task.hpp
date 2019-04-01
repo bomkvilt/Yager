@@ -33,14 +33,14 @@ namespace threading
 			}
 		}
 
-		int Prevs() const;
-		int Nexts() const;
-
+		int NPrev() const;
+		int NNext() const;
+		
 	private:
 		friend class Threadpool;
 
-		std::vector<FTask*> nexts; //!< next comming tasks
-		std::atomic_int  prev = 0; //!< previous tasks
+		std::vector<FTask*> nexts;	//!< next comming tasks
+		std::atomic_int prev = 0;	//!< previous tasks
 
 		void OnPrevDone(); //!< a previous task has been complitted
 		void OnFinished(); //!< the task has boon finished
@@ -69,12 +69,12 @@ namespace threading
 	 */
 	struct FLambdaTask : public FTask
 	{
-		using clb = std::function<void(IThreadpool&)>;
 		using ptr = std::unique_ptr<FLambdaTask>;
-		static FLambdaTask::ptr New(clb run);
+		static FLambdaTask::ptr New(std::function<void(IThreadpool&)> run);
+		static FLambdaTask::ptr New(std::function<void()> run);
 
 	public:
-		FLambdaTask(clb run);
+		FLambdaTask(std::function<void(IThreadpool&)> run);
 
 		virtual void Run(IThreadpool& pool) override;
 

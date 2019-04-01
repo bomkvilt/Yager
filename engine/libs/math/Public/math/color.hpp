@@ -63,17 +63,12 @@ public: //~~~~~~~~~~~~~~| misc
 	FColor Lerp(const FColor& r, FReal factor);
 
 	std::string ToString() const;
-
-public: //~~~~~~~~~~~~~~| constants
-
-	static const FColor Red;
-	static const FColor Green;
-	static const FColor Blue;
 };
-FColor operator+(FReal r, const FColor& c) { return c + r; }
-FColor operator-(FReal r, const FColor& c) { return c - r; }
-FColor operator*(FReal r, const FColor& c) { return c * r; }
-FColor operator/(FReal r, const FColor& c) { return c / r; }
+
+FColor operator+(FReal r, const FColor& c);
+FColor operator-(FReal r, const FColor& c);
+FColor operator*(FReal r, const FColor& c);
+FColor operator/(FReal r, const FColor& c);
 
 
 #endif //!COLOR_HPP

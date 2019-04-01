@@ -1,4 +1,5 @@
 GN_Subprojects(
+    libs/libcds
     libs/boost
     libs/reflect
     libs/math

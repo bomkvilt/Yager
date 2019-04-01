@@ -10,27 +10,52 @@ namespace threading
 	{
 	public:
 		void Construct(FThreadingConfig newConfig);
+		
+		~Threadpool();
 
 		void AddTask(FTask::ptr&& task);
 
 	private:
-		///!< just a worker
-		void Worker();
+		/// << types
+		using SThreads	= boost::thread_group;
+		using SVector	= std::vector<FTask::ptr>;
 
-	private:
-		/// << aliaces
-		using SThreads = boost::thread_group;
+		struct SList : public boost::noncopyable
+		{
+			std::list<FTask::ptr>	tasks;
+			std::mutex				tasks_mu;
+
+			void Push(FTask::ptr&& task);
+			void Flush(SList& r);
+		};
+
+		enum { eAllign = std::hardware_destructive_interference_size };
+		struct alignas(eAllign) FLocalStorage : public boost::noncopyable
+		{
+			SList tasks;
+		};
+
+		using SLocalMap = std::map<threading::ID, FLocalStorage>;
 
 		/// << threads
-		SThreads threads;
+		SThreads   threads;
+		SLocalMap  localStorages;
+		std::mutex localStorages_mu;
+		std::atomic_int nthreads = 0;
 
 		/// << tasks
-		std::mutex tasks_mutex;
-		std::list<FTask::ptr> tasks; //TODO:: cash interferention is possible. Add local thread queues
+		SList tasks;
 
 		/// << config
 		FThreadingConfig config;
 		std::atomic_bool bConfig = false;
+		std::atomic_bool bAlive  = true;
+
+	private:
+		void Worker();
+		bool Handle  (SVector& localTasks);
+		bool GetTasks(SVector& localTasks);
+		FLocalStorage& GetLocalStorage();
 	};
 }
 

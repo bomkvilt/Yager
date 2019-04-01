@@ -43,12 +43,12 @@ namespace threading
 	//						  Task
 	//********************************************************
 
-	int FTask::Prevs() const
+	int FTask::NPrev() const
 	{
 		return prev;
 	}
 
-	int FTask::Nexts() const
+	int FTask::NNext() const
 	{
 		return int(nexts.size());
 	}
@@ -70,12 +70,17 @@ namespace threading
 	//						  LambdaTask
 	//********************************************************
 
-	FLambdaTask::ptr FLambdaTask::New(clb run)
+	FLambdaTask::ptr FLambdaTask::New(std::function<void(IThreadpool&)> run)
 	{
 		return std::make_unique<FLambdaTask>(run);
 	}
 
-	FLambdaTask::FLambdaTask(clb run)
+	FLambdaTask::ptr FLambdaTask::New(std::function<void()> run)
+	{
+		return std::make_unique<FLambdaTask>([run](IThreadpool&) { run(); });
+	}
+
+	FLambdaTask::FLambdaTask(std::function<void(IThreadpool&)> run)
 		: lambda(run)
 	{}
 
