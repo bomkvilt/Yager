@@ -1,9 +1,8 @@
 GN_Subprojects(
-    libs/libcds
     libs/boost
     libs/reflect
-    libs/math
     libs/threading
+    libs/math
     common
     core
     )

@@ -6,16 +6,15 @@ if (POLICY CMP0074)
 if (POLICY CMP0079)
     cmake_policy(SET CMP0079 NEW)
     endif()
-set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER AutoFolder)
 #~~~~~~~~~~~~~~~~~~~~~~~| >>  |
 include("cmake/setup.cmake")
 include("cmake/gremlin/gremlin.cmake")
 
 set(GN_bDebug off)
-set(GN_bTests on)
+set(GN_bTests on )
 set(GN_bUnity off)
 SetupEvniroment()
-GN_Solutoin("Pango")
+GN_Solutoin("Grove")
 
 #~~~~~~~~~~~~~~~~~~~~~~~| >>  |
 GN_Subprojects(

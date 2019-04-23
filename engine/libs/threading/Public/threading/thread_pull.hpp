@@ -16,6 +16,8 @@ namespace threading
 	struct IThreadpool : public boost::noncopyable
 	{
 	public:
+		virtual ~IThreadpool() {};
+
 		static IThreadpool& Get();
 
 		virtual void Construct(FThreadingConfig newConfig) = 0;

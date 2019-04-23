@@ -182,11 +182,12 @@ public: //~~~~~~~~~~~~~~| misc
 
 	std::string ToString() const
 	{
-		return (std::ostringstream()
-			<< "x: " << x << " "
+		auto ss = std::ostringstream();
+		ss 	<< "x: " << x << " "
 			<< "y: " << y << " "
 			<< "z: " << z << " "
-			<< "w: " << w).str();
+			<< "w: " << w;
+		return ss.str();
 	}
 
 public: //~~~~~~~~~~~~~~| static

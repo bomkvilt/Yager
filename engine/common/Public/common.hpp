@@ -16,4 +16,10 @@
 #include "math/transform.hpp"
 
 
+using FTransform = TTransform<FReal>;
+using FVector2   = TVector2<FReal>;
+using FVector    = TVector<FReal>;
+using FQuat      = TQuat<FReal>;
+
+
 #endif //!COMMON_HPP

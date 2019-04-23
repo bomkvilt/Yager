@@ -42,8 +42,9 @@ public: //~~~~~~~~~~~~~~| Initalisers
 	{
 		if (auto& inits = Get().inits; inits.size())
 		{
-			return dynamic_cast<T*>(inits.top());
+			return *dynamic_cast<T*>(inits.top());
 		}
+		else throw std::runtime_error("no initialiser was found");
 	}
 
 private: //~~~~~~~~~~~~~~| internal

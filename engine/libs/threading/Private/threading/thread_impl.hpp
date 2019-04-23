@@ -11,7 +11,14 @@ namespace threading
 	public:
 		void Construct(FThreadingConfig newConfig);
 		
-		~Threadpool();
+		~Threadpool()
+		{
+			bAlive = false;
+			while (nthreads)
+			{
+				std::this_thread::yield();
+			}
+		}
 
 		void AddTask(FTask::ptr&& task);
 
@@ -29,7 +36,8 @@ namespace threading
 			void Flush(SList& r);
 		};
 
-		enum { eAllign = std::hardware_destructive_interference_size };
+		enum { eAllign = 256 };
+		// enum { eAllign = std::hardware_destructive_interference_size };
 		struct alignas(eAllign) FLocalStorage : public boost::noncopyable
 		{
 			SList tasks;

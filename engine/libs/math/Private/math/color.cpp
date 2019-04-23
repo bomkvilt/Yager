@@ -100,11 +100,12 @@ FColor FColor::Lerp(const FColor & r, FReal factor)
 
 std::string FColor::ToString() const
 {
-	return (std::ostringstream()
-		<< "R: " << R << " "
+	auto ss = std::ostringstream();
+	ss	<< "R: " << R << " "
 		<< "G: " << G << " "
 		<< "B: " << B << " "
-		<< "A: " << A).str();
+		<< "A: " << A;
+	return ss.str();
 }
 
 FColor operator+(FReal r, const FColor& c) { return c + r; }

@@ -1,0 +1,3 @@
+#ifndef ACTOR_MODULE_HPP
+#define ACTOR_MODULE_HPP
+#endif //!ACTOR_MODULE_HPP

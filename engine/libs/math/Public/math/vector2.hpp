@@ -109,9 +109,10 @@ public: //--------------| misc
 
 	std::string ToString() const
 	{
-		return (std::ostringstream()
-			<< "x: " << x << " "
-			<< "y: " << y).str();
+		auto ss = std::ostringstream();
+		ss 	<< "x: " << x << " "
+			<< "y: " << y;
+		return ss.str();
 	}
 
 	const static TVector2<T> ZeroVector;
