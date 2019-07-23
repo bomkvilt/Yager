@@ -3,6 +3,18 @@
 set(GN_guards_bEnabled   on)
 set(GN_guards_extentions ".h" ".hpp")
 
+## --------------------------| initialisation |-------------------------- ##
+
+function(GN_guards_init)
+    # make a extentions mutch expression
+    list(JOIN GN_guards_extentions "|" exts)
+    string(REPLACE "." "\\." exts ${exts})
+    set(GN_guards_exts ${exts} on CACHE STRING "" FORCE)
+
+    # set as initialised
+    set(GN_guards_bInitialised on CACHE BOOL "" FORCE)
+    endfunction()
+
 ## --------------------------| internal |-------------------------- ##
 
 function(GN_guards_processHeaders unit files)
@@ -10,15 +22,14 @@ function(GN_guards_processHeaders unit files)
     if (NOT GN_guards_bEnabled)
         return()
         endif()
-
-    # make a mutch expression
-    list(JOIN GN_guards_extentions "|" exts)
-    string(REPLACE "." "\\." exts ${exts})
+    
+    if (NOT GN_guards_bInitialised)
+        message(FATAL_ERROR "unit 'guards' must be initialised to be used")
+        endif()
 
     # process headers
     foreach(file ${files})
-        if (file MATCHES "${exts}")
-            message(STATUS ${file})
+        if (file MATCHES "${GN_guards_exts}")
             GN_guards_processHeader(${unit} ${file})
             endif()
         endforeach()

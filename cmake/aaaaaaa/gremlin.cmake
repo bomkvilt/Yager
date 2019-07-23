@@ -31,6 +31,7 @@ foreach(module ${GN_modules_enabled})
 macro(GN_Solution name)
     GN_project(${name})
     GN_setupEnviroment()
+    GN_callEvent("onInit")
     endmacro()
 
 macro(GN_Configure)
