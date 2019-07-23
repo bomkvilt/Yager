@@ -9,12 +9,13 @@ set(GN_dir_private  "private"       CACHE STRING "private code directory")
 set(GN_dir_public   "public"        CACHE STRING "public code directory")
 set(GN_dir_tests    "tests"         CACHE STRING "directory with test files")
 ## -----------| enabled modules
-set(GN_modules_avaliable guards PCH projects tests unity)
-set(GN_modules_enabled   guards PCH projects tests unity)
+set(GN_modules_avaliable "vcpkg" "test" "guards" "PCH" "unity")
+set(GN_modules_enabled   "vcpkg" "test" "guards" "PCH" "unity")
 
 
 # include internal functions
 set(GN_dir_gremlin "${CMAKE_CURRENT_LIST_DIR}" CACHE STRING "" FORCE)
+include("${GN_dir_gremlin}/internal/log.cmake")
 include("${GN_dir_gremlin}/internal/enviroment.cmake")
 include("${GN_dir_gremlin}/internal/helpers.cmake")
 include("${GN_dir_gremlin}/internal/modules.cmake")
@@ -59,7 +60,7 @@ macro(GN_Subprojects)
 function(GN_Unit Name)
     # create a new unit
     GN_newUnit(unit ${Name} ${ARGN})
-    GN_debug("-----------------------------" "-----------------------------")
+    GN_debugLine()
     GN_debug("Name" "${${unit}_name}")
     GN_debug("Mode" "${${unit}_Mode}")
     GN_debug("Root" "${${unit}_dir_root}")
@@ -68,7 +69,7 @@ function(GN_Unit Name)
     GN_scanUnits(${unit}_units ${unit})
     GN_debug("units" "${${unit}_units}")
     
-    # scan sources and add to a project tree
+    # scan sources and add them to a project tree
     GN_scanSources(${unit}_src_private ${${unit}_dir_private} ${${unit}_dir_root})
     GN_scanSources(${unit}_src_public  ${${unit}_dir_public}  ${${unit}_dir_root})
     GN_debug("public files" "${${unit}_src_public}")

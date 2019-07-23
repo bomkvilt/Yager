@@ -10,7 +10,7 @@ if (POLICY CMP0079)
 include("cmake/setup.cmake")
 include("cmake/aaaaaaa/gremlin.cmake")
 
-set(GN_bDebug off )
+set(GN_bDebug off)
 set(GN_bTests on )
 set(GN_bUnity off)
 SetupEvniroment()

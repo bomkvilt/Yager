@@ -1,7 +1,4 @@
 ## --------------------------| helpers |-------------------------- ##
-## -----------| settings
-set(GN_debug_ident 15)
-
 ## -----------| common
 
 # project creates a new cmake project
@@ -22,50 +19,6 @@ function(GN_default _result value)
     if ("${${_result}}" STREQUAL "")
         GN_return("${value}")
         endif()
-    endfunction()
-
-
-# debug print debug messages if they are enabled
-function(GN_debug key msg)
-    if (NOT GN_bDebug)
-        return()
-        endif()
-    
-    # ident key
-    string(LENGTH "${key}" len)
-    if (len LESS ${GN_debug_ident})
-        # how many ' ' we need to insert
-        math(EXPR delta "${GN_debug_ident} - ${len}")
-        # generate the string
-        string(REPEAT " " ${delta} ident)
-        string(APPEND key ${ident})
-    else()
-        # trim input string
-        string(SUBSTRING "${key}" 0 ${GN_debug_ident} key)
-        endif()
-    
-    # bucket size
-    list(LENGTH msg len)
-    math(EXPR end "${len} - 1")
-    if (${end} LESS 0)
-        return()
-        endif()
-
-    set(len ${ARGN})
-    GN_default(len 1)
-
-    # print message
-    set(bPrinted off)
-    foreach(i RANGE 0 ${end} ${len})
-        # print a sublist
-        list(SUBLIST msg ${i} ${len} bucket)
-        message("${key} : ${bucket}")
-        # change the key to ident
-        if (NOT bPrinted)
-            set(bPrinted on)
-            string(REPEAT " " ${GN_debug_ident} key)
-            endif()
-        endforeach()
     endfunction()
 
 ## -----------| global storage
