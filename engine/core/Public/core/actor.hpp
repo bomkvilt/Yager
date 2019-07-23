@@ -1,5 +1,5 @@
-#ifndef ACTOR_HPP
-#define ACTOR_HPP
+#ifndef CORE_ACTOR_HPP
+#define CORE_ACTOR_HPP
 
 #include "core/object.hpp"
 #include "interface/world_object.hpp"
@@ -16,4 +16,4 @@ public:
 };
 
 
-#endif //!ACTOR_HPP
+#endif //!CORE_ACTOR_HPP

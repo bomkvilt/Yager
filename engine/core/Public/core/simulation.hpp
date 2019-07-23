@@ -1,5 +1,5 @@
-#ifndef SIMULATION_HPP
-#define SIMULATION_HPP
+#ifndef CORE_SIMULATION_HPP
+#define CORE_SIMULATION_HPP
 
 #include <chrono>
 #include <atomic>
@@ -50,4 +50,4 @@ private:
 };
 
 
-#endif //!SIMULATION_HPP
+#endif //!CORE_SIMULATION_HPP

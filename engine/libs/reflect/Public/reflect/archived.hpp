@@ -1,5 +1,5 @@
-#ifndef ARCHIVED_HPP
-#define ARCHIVED_HPP
+#ifndef REFLECT_ARCHIVED_HPP
+#define REFLECT_ARCHIVED_HPP
 
 
 namespace reflect
@@ -39,4 +39,4 @@ namespace reflect
 /**/
 
 
-#endif //!ARCHIVED_HPP
+#endif //!REFLECT_ARCHIVED_HPP

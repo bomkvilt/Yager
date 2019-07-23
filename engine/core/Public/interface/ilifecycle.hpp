@@ -1,5 +1,5 @@
-#ifndef ILIFECYCLE_HPP
-#define ILIFECYCLE_HPP
+#ifndef CORE_ILIFECYCLE_HPP
+#define CORE_ILIFECYCLE_HPP
 
 
 struct ILifecycle
@@ -21,4 +21,4 @@ public:
 };
 
 
-#endif //!ILIFECYCLE_HPP
+#endif //!CORE_ILIFECYCLE_HPP

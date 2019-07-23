@@ -1,5 +1,5 @@
-#ifndef THREAD_TASK_HPP
-#define THREAD_TASK_HPP
+#ifndef THREADING_THREAD_TASK_HPP
+#define THREADING_THREAD_TASK_HPP
 
 #include <boost/noncopyable.hpp>
 #include <functional>
@@ -84,4 +84,4 @@ namespace threading
 }
 
 
-#endif //!THREAD_TASK_HPP
+#endif //!THREADING_THREAD_TASK_HPP

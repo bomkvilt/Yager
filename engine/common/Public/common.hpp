@@ -1,5 +1,5 @@
-#ifndef COMMON_HPP
-#define COMMON_HPP
+#ifndef COMMON_COMMON_HPP
+#define COMMON_COMMON_HPP
 
 #include <memory>
 
@@ -22,4 +22,4 @@ using FVector    = TVector<FReal>;
 using FQuat      = TQuat<FReal>;
 
 
-#endif //!COMMON_HPP
+#endif //!COMMON_COMMON_HPP

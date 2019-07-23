@@ -1,5 +1,5 @@
-#ifndef THREAD_PULL_HPP
-#define THREAD_PULL_HPP
+#ifndef THREADING_THREAD_PULL_HPP
+#define THREADING_THREAD_PULL_HPP
 
 #include "threading/thread.hpp"
 #include "threading/thread_task.hpp"
@@ -26,4 +26,4 @@ namespace threading
 	};
 }
 
-#endif //!THREAD_PULL_HPP
+#endif //!THREADING_THREAD_PULL_HPP

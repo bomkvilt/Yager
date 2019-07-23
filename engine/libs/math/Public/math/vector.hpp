@@ -1,5 +1,5 @@
-#ifndef VECTOR_HPP
-#define VECTOR_HPP
+#ifndef MATH_VECTOR_HPP
+#define MATH_VECTOR_HPP
 
 #include <string>
 #include "math/math.hpp"
@@ -165,4 +165,4 @@ namespace Math
 }
 
 
-#endif //!VECTOR_HPP
+#endif //!MATH_VECTOR_HPP

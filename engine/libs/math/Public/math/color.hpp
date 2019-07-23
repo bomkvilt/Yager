@@ -1,5 +1,5 @@
-#ifndef COLOR_HPP
-#define COLOR_HPP
+#ifndef MATH_COLOR_HPP
+#define MATH_COLOR_HPP
 
 #include "math/math.hpp"
 #include "math/math_common.hpp"
@@ -71,4 +71,4 @@ FColor operator*(FReal r, const FColor& c);
 FColor operator/(FReal r, const FColor& c);
 
 
-#endif //!COLOR_HPP
+#endif //!MATH_COLOR_HPP

@@ -1,5 +1,5 @@
-#ifndef CONFIG_HPP
-#define CONFIG_HPP
+#ifndef REFLECT_CONFIG_HPP
+#define REFLECT_CONFIG_HPP
 
 #include <string_view>
 #include "reflect/archived.hpp"
@@ -15,4 +15,4 @@ namespace reflect
 	};
 }
 
-#endif //!CONFIG_HPP
+#endif //!REFLECT_CONFIG_HPP

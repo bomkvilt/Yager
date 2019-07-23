@@ -1,5 +1,5 @@
-#ifndef HIT_TIMER_HPP
-#define HIT_TIMER_HPP
+#ifndef COMMON_HIT_TIMER_HPP
+#define COMMON_HIT_TIMER_HPP
 
 
 class HitTimer
@@ -23,4 +23,4 @@ public:
 };
 
 
-#endif //!HIT_TIMER_HPP
+#endif //!COMMON_HIT_TIMER_HPP

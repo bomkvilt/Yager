@@ -1,5 +1,5 @@
-#ifndef THREAD_CONFIG_HPP
-#define THREAD_CONFIG_HPP
+#ifndef THREADING_THREAD_CONFIG_HPP
+#define THREADING_THREAD_CONFIG_HPP
 
 #include "config/config.hpp"
 
@@ -15,4 +15,4 @@ struct FThreadingConfig : public reflect::FConfig
 };
 
 
-#endif //!THREAD_CONFIG_HPP
+#endif //!THREADING_THREAD_CONFIG_HPP

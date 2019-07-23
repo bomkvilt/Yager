@@ -1,5 +1,5 @@
-#ifndef THREAD_CONTEXT_HPP
-#define THREAD_CONTEXT_HPP
+#ifndef CORE_THREAD_CONTEXT_HPP
+#define CORE_THREAD_CONTEXT_HPP
 
 #include <stack>
 #include <boost/noncopyable.hpp>
@@ -64,4 +64,4 @@ private:
 };
 
 
-#endif //!THREAD_CONTEXT_HPP
+#endif //!CORE_THREAD_CONTEXT_HPP

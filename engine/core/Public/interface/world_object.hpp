@@ -1,5 +1,5 @@
-#ifndef WORLD_OBJECT_HPP
-#define WORLD_OBJECT_HPP
+#ifndef CORE_WORLD_OBJECT_HPP
+#define CORE_WORLD_OBJECT_HPP
 
 #include "common.hpp"
 #include "core/core_types.hpp"
@@ -22,4 +22,4 @@ public:
 };
 
 
-#endif //!WORLD_OBJECT_HPP
+#endif //!CORE_WORLD_OBJECT_HPP

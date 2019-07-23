@@ -1,5 +1,5 @@
-#ifndef THREAD_HPP
-#define THREAD_HPP
+#ifndef THREADING_THREAD_HPP
+#define THREADING_THREAD_HPP
 
 #include <thread>
 
@@ -11,4 +11,4 @@ namespace threading
 	ID GetThreadID();
 }
 
-#endif //!THREAD_HPP
+#endif //!THREADING_THREAD_HPP

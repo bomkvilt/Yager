@@ -1,8 +1,8 @@
-#ifndef REFLECT_HPP
-#define REFLECT_HPP
+#ifndef REFLECT_REFLECT_HPP
+#define REFLECT_REFLECT_HPP
 
 #include "reflect/archived.hpp"
 #include "reflect/archiver.hpp"
 
 
-#endif //!REFLECT_HPP
+#endif //!REFLECT_REFLECT_HPP

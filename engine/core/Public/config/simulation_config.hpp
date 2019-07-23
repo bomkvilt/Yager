@@ -1,5 +1,5 @@
-#ifndef SIMULATION_CONFIG_HPP
-#define SIMULATION_CONFIG_HPP
+#ifndef CORE_SIMULATION_CONFIG_HPP
+#define CORE_SIMULATION_CONFIG_HPP
 
 #include "config/config.hpp"
 
@@ -14,4 +14,4 @@ struct FSimulationConfig : public reflect::FConfig
 };
 
 
-#endif //!SIMULATION_CONFIG_HPP
+#endif //!CORE_SIMULATION_CONFIG_HPP

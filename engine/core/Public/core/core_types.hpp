@@ -1,5 +1,5 @@
-#ifndef CORE_TYPES_HPP
-#define CORE_TYPES_HPP
+#ifndef CORE_CORE_TYPES_HPP
+#define CORE_CORE_TYPES_HPP
 
 #include <string>
 #include "common.hpp"
@@ -38,4 +38,4 @@ using UID   = UInt64;
 using FName = std::string;
 
 
-#endif //!CORE_TYPES_HPP
+#endif //!CORE_CORE_TYPES_HPP

@@ -1,5 +1,5 @@
-#ifndef OBJECT_HPP
-#define OBJECT_HPP
+#ifndef CORE_OBJECT_HPP
+#define CORE_OBJECT_HPP
 
 #include "reflect/archived.hpp"
 #include "core/core_types.hpp"
@@ -28,4 +28,4 @@ private:
 };
 
 
-#endif //!OBJECT_HPP
+#endif //!CORE_OBJECT_HPP

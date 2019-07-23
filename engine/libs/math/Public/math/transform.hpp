@@ -1,5 +1,5 @@
-#ifndef TRANSFORM_HPP
-#define TRANSFORM_HPP
+#ifndef MATH_TRANSFORM_HPP
+#define MATH_TRANSFORM_HPP
 
 #include "math/quat.hpp"
 #include "math/vector.hpp"
@@ -133,4 +133,4 @@ TTransform<T> operator*(const TQuat<Q>& q, const TTransform<T>& t)
 template<typename T>
 const TTransform<T> TTransform<T>::Identity;
 
-#endif //!TRANSFORM_HPP
+#endif //!MATH_TRANSFORM_HPP

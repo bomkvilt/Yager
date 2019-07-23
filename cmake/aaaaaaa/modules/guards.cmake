@@ -1,31 +1,32 @@
 ## --------------------------| variables |-------------------------- ##
 ## -----------| settings
-set(GN_guards_bEnabled      on      CACHE BOOL "whether the unit is enabled")
-set(GN_guards_extentions    "h;hpp" CACHE STRING "list of supported extentions")
+set(GN_guards_bEnabled   on)
+set(GN_guards_extentions ".h" ".hpp")
 
 ## --------------------------| internal |-------------------------- ##
 
-function(GN_guards_processHeaders files)
+function(GN_guards_processHeaders unit files)
     # if disables
     if (NOT GN_guards_bEnabled)
         return()
         endif()
 
     # make a mutch expression
-    string(REPLACE "." "\\." clean ${GN_guards_extentions})
-    list(JOIN clean "|" exts)
+    list(JOIN GN_guards_extentions "|" exts)
+    string(REPLACE "." "\\." exts ${exts})
 
     # process headers
     foreach(file ${files})
         if (file MATCHES "${exts}")
-            GN_guards_processHeader(${file})
+            message(STATUS ${file})
+            GN_guards_processHeader(${unit} ${file})
             endif()
         endforeach()
     endfunction()
 
-function(GN_guards_processHeader file)
+function(GN_guards_processHeader unit file)
     # generate guards
-    GN_guards_guardName(name ${file})
+    GN_guards_guardName(name ${unit} ${file})
     GN_guards_topGuard(top ${name})
     GN_guards_botGuard(bot ${name})
 
@@ -51,8 +52,9 @@ function(GN_guards_processHeader file)
     file(WRITE ${file} "${out}")
     endfunction()
 
-function(GN_guards_guardName _result file)
+function(GN_guards_guardName _result unit file)
     get_filename_component(name ${file} NAME)
+    string(PREPEND name "${unit}_")
     string(REPLACE "." "_" _d ${name})
     string(TOUPPER ${_d} _upper)
     GN_return(${_upper})

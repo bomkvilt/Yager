@@ -1,5 +1,5 @@
-#ifndef ARCHIVER_HPP
-#define ARCHIVER_HPP
+#ifndef REFLECT_ARCHIVER_HPP
+#define REFLECT_ARCHIVER_HPP
 
 #include <string>
 #include <map>
@@ -236,4 +236,4 @@ namespace reflect
 }
 
 
-#endif //!ARCHIVER_HPP
+#endif //!REFLECT_ARCHIVER_HPP

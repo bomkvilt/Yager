@@ -1,5 +1,5 @@
-#ifndef MATH_COMMON_HPP
-#define MATH_COMMON_HPP
+#ifndef MATH_MATH_COMMON_HPP
+#define MATH_MATH_COMMON_HPP
 
 #include <cinttypes>
 
@@ -9,7 +9,7 @@
 using FReal = float;
 #elif F_REAL == 2
 using FReal = double;
-#endif //!MATH_COMMON_HPP
+#endif //!MATH_MATH_COMMON_HPP
 //-------| unsigned int types
 
 using Int8  = int8_t;
@@ -70,4 +70,4 @@ using UInt   = UInt32;
 	V.z OP S 							\
 /**/
 
-#endif //!MATH_COMMON_HPP
+#endif //!MATH_MATH_COMMON_HPP

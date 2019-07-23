@@ -1,5 +1,5 @@
-#ifndef TICK_HPP
-#define TICK_HPP
+#ifndef CORE_TICK_HPP
+#define CORE_TICK_HPP
 
 #include <functional>
 #include <boost/noncopyable.hpp>
@@ -147,4 +147,4 @@ private:
 };
 
 
-#endif //!TICK_HPP
+#endif //!CORE_TICK_HPP

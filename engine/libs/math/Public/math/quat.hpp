@@ -1,5 +1,5 @@
-#ifndef QUAT_HPP
-#define QUAT_HPP
+#ifndef MATH_QUAT_HPP
+#define MATH_QUAT_HPP
 
 #include <string>
 #include "math/vector.hpp"
@@ -224,4 +224,4 @@ template<typename T>
 const TQuat<T> TQuat<T>::Identity = { 0, 0, 0, 1 };
 
 
-#endif //!QUAT_HPP
+#endif //!MATH_QUAT_HPP

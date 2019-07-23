@@ -1,5 +1,5 @@
-#ifndef MATH_HPP
-#define MATH_HPP
+#ifndef MATH_MATH_HPP
+#define MATH_MATH_HPP
 
 #include <algorithm>
 #include "Math/math_common.hpp"
@@ -49,4 +49,4 @@ namespace Math
 	double Min(double x, double y);
 }
 
-#endif //!MATH_HPP
+#endif //!MATH_MATH_HPP
