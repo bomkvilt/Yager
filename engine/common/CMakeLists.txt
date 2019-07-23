@@ -1,5 +1,4 @@
-GB_Module( common
-    Mode "headers"
-    Modules 
+GN_Unit( common
+    Units 
         math
     )

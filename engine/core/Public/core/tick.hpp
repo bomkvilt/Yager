@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <boost/noncopyable.hpp>
+#include "common/hit_timer.hpp"
 #include "core/core_types.hpp"
 
 /**/ class TickManager;
@@ -137,10 +138,12 @@ public:
 	void Remove(Object& object, FTickFunction& tick);	//!< remove the tick funciton 
 	const SBuckets& GetBuckets() const;
 
+	TickManager();
 	void Tick();	//!< perform internal steps and garbage collection | Note: must be called onese a circule
 
 private:
 	SBuckets buckets;
+	HitTimer hits;
 };
 
 

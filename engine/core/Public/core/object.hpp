@@ -12,7 +12,7 @@ class Object : public reflect::FArchived
 	, public ILifecycle
 {
 public:
-	ARCH_BEGIN(Object, reflect::FArchived)
+	ARCH_BEGIN(reflect::FArchived)
 		ARCH_END()
 public:
 	Object();

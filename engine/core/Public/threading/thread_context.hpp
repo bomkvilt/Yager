@@ -7,7 +7,9 @@
 
 
 struct IInitialiser 
-{};
+{
+	virtual ~IInitialiser() = default;
+};
 
 
 class ThreadContext final : public boost::noncopyable

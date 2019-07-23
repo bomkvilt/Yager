@@ -217,3 +217,15 @@ void TickManager::Remove(Object& object, FTickFunction& tick)
 
 const TickManager::SBuckets& TickManager::GetBuckets() const
 { return buckets; }
+
+TickManager::TickManager()
+	: hits(60 * 10)
+{}
+
+void TickManager::Tick()
+{
+	if (hits.Hit())
+	{
+
+	}
+}

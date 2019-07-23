@@ -1,6 +1,6 @@
-GB_Module( main
+GN_Unit( main
     Mode    app
     bFlat   on
-    Modules 
+    Units 
         core
     )
