@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.14)
+
 #~~~~~~~~~~~~~~~~~~~~~~~| >>  |
 if (POLICY CMP0074)
     cmake_policy(SET CMP0074 NEW)
@@ -7,20 +8,18 @@ if (POLICY CMP0079)
     cmake_policy(SET CMP0079 NEW)
     endif()
 #~~~~~~~~~~~~~~~~~~~~~~~| >>  |
-include("cmake/setup.cmake")
-include("cmake/aaaaaaa/gremlin.cmake")
 
-set(GN_bDebug off)
+include("cmake/setup.cmake")
+include("cmake/gremlin/gremlin.cmake")
+
+set(GN_bDebug on )
 set(GN_bTests on )
 set(GN_bUnity off)
+
+GN_Init()
+project("Engine")
 SetupEvniroment()
-
-GN_Solution("Engine")
-
-#~~~~~~~~~~~~~~~~~~~~~~~| >>  |
 GN_Subprojects(
     engine
     snake
-    )
-#~~~~~~~~~~~~~~~~~~~~~~~| >>  |
-GN_Configure()
+)

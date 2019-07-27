@@ -1,5 +1,7 @@
+GN_vcpkg_install(boost)
+
 set(Boost_USE_STATIC_RUNTIME off)
-set(Boost_USE_STATIC_LIBS    off)
+set(Boost_USE_STATIC_LIBS    on)
 set(Boost_USE_MULTITHREADED  on)
 find_package(Boost REQUIRED 
     filesystem 
@@ -7,6 +9,7 @@ find_package(Boost REQUIRED
     thread
     system
     regex)
+
 
 GN_Unit( boost
     Libs            ${Boost_LIBRARIES}
