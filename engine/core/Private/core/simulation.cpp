@@ -8,26 +8,46 @@ UNIQUE(Simulation) Simulation::New()
 	return std::make_unique<Simulation>();
 }
 
+Simulation::Simulation()
+{}
+
+Simulation::~Simulation()
+{
+	if (GetLifeStage() != ELifeStage::eInDestroy)
+	{
+		std::cerr << "still active simlation gets gestroyed" << std::endl;
+	}
+}
+
 void Simulation::OnConstructed()
 {	/// init time
+	ILifecycle::OnConstructed();
+
 	time_current = SClock::now();
 }
 
 void Simulation::OnBeginPlay()
 {	/// start tick circule
+	ILifecycle::OnBeginPlay();
+
 	using namespace threading;
 	AddTask(FLambdaTask::New([this]() { DoTick(); }));
 }
 
 void Simulation::OnPause()
-{}
+{
+	ILifecycle::OnPause();
+}
 
 void Simulation::OnResume()
-{}
+{
+	ILifecycle::OnResume();
+}
 
 void Simulation::OnEndPlay()
 {
-	bActive = false;
+	ILifecycle::OnEndPlay();
+	
 	while (ntasks)
 	{
 		std::this_thread::yield();
@@ -35,7 +55,9 @@ void Simulation::OnEndPlay()
 }
 
 void Simulation::OnDestruction()
-{}
+{
+	ILifecycle::OnDestruction();
+}
 
 std::tuple<threading::FTask::ptr, threading::FTask::ptr> Simulation::CreateNext(ETickPhase phase)
 {
@@ -87,7 +109,8 @@ void Simulation::AddTask(threading::FTask::ptr&& task)
 
 void Simulation::DoTick() //TODO:: substruct tick time avg error
 {
-	if (!bActive)
+	if (   GetLifeStage() == ELifeStage::eStoped
+		|| GetLifeStage() == ELifeStage::eInDestroy )
 	{	/// terminate the simulation
 		return;
 	}
@@ -118,15 +141,17 @@ void Simulation::DoTick() //TODO:: substruct tick time avg error
 	{	/// create tasks and lunch them
 		using namespace threading;
 
+		static const auto tickStages = GetTickStages();
+
 		/// create and link tasks
 		std::vector<FTask::ptr> tasks;
-		for (auto phase : {
-			  ETickPhase::eInputParsing
-			, ETickPhase::ePrePhysics
-			, ETickPhase::eInPhysics
-			, ETickPhase::ePostPhysics
-			, ETickPhase::eSerialisation })
+		for (auto phase : ETickPhaseList())
 		{
+			if (!tickStages[(UInt8)GetLifeStage()][(UInt8)phase])
+			{
+				continue;
+			}
+
 			auto [publicTasks, privateTasks] = CreateNext(phase);
 			if (tasks.size())
 			{ 
@@ -151,4 +176,26 @@ void Simulation::DoTick() //TODO:: substruct tick time avg error
 			AddTask(std::move(task));
 		}
 	}
+}
+
+constexpr std::array<std::array<bool, ETickPhaseCount>, ELifeStageCount> Simulation::GetTickStages()
+{
+	auto table = std::array<std::array<bool, ETickPhaseCount>, ELifeStageCount>{{0}};
+	auto allow = [&](ELifeStage stage, ETickPhase phase)
+	{
+		table[UInt8(stage)][UInt8(phase)] = true;
+	};
+	auto allowAll = [&](ELifeStage stage)
+	{
+		for (UInt8 i = 0; i < ETickPhaseCount; ++i)
+		{
+			allow(stage, ETickPhase(i));
+		}
+	};
+	allowAll(ELifeStage::eActive);
+	allow(ELifeStage::ePaused, ETickPhase::eInputParsing);
+	allow(ELifeStage::ePaused, ETickPhase::eSerialisation);
+	allow(ELifeStage::ePaused, ETickPhase::ePreRender);
+	allow(ELifeStage::ePaused, ETickPhase::eInRender);
+	return table;
 }

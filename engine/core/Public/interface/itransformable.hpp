@@ -2,10 +2,10 @@
 #define CORE_WORLD_OBJECT_HPP
 
 #include "common.hpp"
-#include "core/core_types.hpp"
+#include "core/types.hpp"
 
 
-struct IWorldObject
+struct ITransformable
 {
 public:
 	virtual FTransform  GetTransform(EWorldType world) const = 0;
@@ -18,7 +18,7 @@ public:
 	virtual FQuat&      GetRotation (EWorldType world) = 0;
 
 public:
-	virtual ~IWorldObject() = default;
+	virtual ~ITransformable() = default;
 };
 
 

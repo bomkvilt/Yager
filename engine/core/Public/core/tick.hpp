@@ -5,7 +5,7 @@
 #include <shared_mutex>
 #include <boost/noncopyable.hpp>
 #include "common/hit_timer.hpp"
-#include "core/core_types.hpp"
+#include "core/types.hpp"
 
 /**/ class TickManager;
 /**/ class Object;

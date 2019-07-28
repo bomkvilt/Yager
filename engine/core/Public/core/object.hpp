@@ -2,17 +2,21 @@
 #define CORE_OBJECT_HPP
 
 #include "reflect/archived.hpp"
-#include "core/core_types.hpp"
+#include "core/types.hpp"
 #include "interface/ilifecycle.hpp"
+#include "interface/itransformable.hpp"
 
 /**/ class Actor;
 
 
 class Object : public reflect::FArchived
+	, public ITransformable
 	, public ILifecycle
 {
 public:
 	ARCH_BEGIN(reflect::FArchived)
+		ARCH_FIELD(, , name)
+		ARCH_FIELD(, , uid)
 		ARCH_END()
 public:
 	Object();

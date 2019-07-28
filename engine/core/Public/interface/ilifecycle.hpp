@@ -1,6 +1,23 @@
 #ifndef CORE_ILIFECYCLE_HPP
 #define CORE_ILIFECYCLE_HPP
 
+#include "common.hpp"
+#include <atomic>
+#include <array>
+
+
+enum class ELifeStage: UInt8
+{
+	  eNotInitialised
+	, eConstructed
+	, eActive
+	, ePaused
+	, eStoped
+	, eInDestroy
+};
+
+constexpr auto ELifeStageCount = (UInt8)ELifeStage::eInDestroy + 1;
+
 
 struct ILifecycle
 {	//!^ lifecycle callbacks interface
@@ -9,15 +26,26 @@ public:
 	 * \Note: the following functions are plased in a lyfecycle sequence
 	 */
 	
-	virtual void OnConstructed() {}	//!< on object contructed
-	virtual void OnBeginPlay() {}	//!< on obejct started
-	virtual void OnPause() {}		//!< on object paused
-	virtual void OnResume() {}		//!< on object resumed
-	virtual void OnEndPlay() {}		//!< on object play ended
-	virtual void OnDestruction() {}	//!< on object resuruction begining
+	virtual void OnConstructed() { SetLifeStage(ELifeStage::eConstructed); }
+	virtual void OnBeginPlay()	 { SetLifeStage(ELifeStage::eActive); }
+	virtual void OnPause()		 { SetLifeStage(ELifeStage::ePaused); }
+	virtual void OnResume()		 { SetLifeStage(ELifeStage::eActive); }
+	virtual void OnEndPlay()	 { SetLifeStage(ELifeStage::eStoped); }
+	virtual void OnDestruction() { SetLifeStage(ELifeStage::eInDestroy); }
+	
+	virtual ~ILifecycle() throw();
 
-public:
-	virtual ~ILifecycle() = default;
+	ELifeStage GetLifeStage() const;
+
+private:
+	std::atomic<ELifeStage> stage = ELifeStage::eNotInitialised;
+
+	void SetLifeStage(ELifeStage newStage);
+
+	
+	static constexpr std::array<std::array<bool, ELifeStageCount>, ELifeStageCount> MakeTranslatoinTable();
+
+	static std::string StageToName(ELifeStage stage);
 };
 
 

@@ -2,6 +2,7 @@
 #define CORE_CORE_TYPES_HPP
 
 #include <string>
+#include <array>
 #include "common.hpp"
 
 
@@ -15,8 +16,23 @@ enum class ETickPhase : Int8
 	, ePrePhysics		//!< 
 	, eInPhysics		//!< 
 	, ePostPhysics		//!< 
-	, eSerialisation	//!< 
+	, eGameLogic		//!<
+	, eSerialisation	//!<
+	, ePreRender		//!<
+	, eInRender			//!<
 };
+
+constexpr auto ETickPhaseCount = (UInt8)ETickPhase::eInRender + 1;
+
+constexpr std::array<ETickPhase, ETickPhaseCount> ETickPhaseList()
+{
+	auto list = std::array<ETickPhase, ETickPhaseCount>();
+	for (int i = 0; i < ETickPhaseCount; ++i)
+	{
+		list[i] = ETickPhase(i);
+	}
+	return list;
+}
 
 
 enum class ETickType : Int8

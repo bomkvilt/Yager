@@ -19,6 +19,9 @@ class Simulation final : public ILifecycle
 public:
 	static UNIQUE(Simulation) New();
 
+	 Simulation();
+	~Simulation();
+
 public: //~~~~~~~~~~~~~~| << ILifecycle
 	virtual void OnConstructed() override;
 	virtual void OnBeginPlay() override;
@@ -36,7 +39,6 @@ private: //~~~~~~~~~~~~~~| ticks
 	void DoTick();
 
 private: 
-	std::atomic_bool bActive = true;
 	std::atomic_int ntasks = 0;
 
 	TickManager ticks;			//!< tick manager
@@ -45,6 +47,10 @@ private:
 	FReal time_delta      = 0;  //!< last frame delta step
 
 	FSimulationConfig config;
+
+private:
+
+	static constexpr std::array<std::array<bool, ETickPhaseCount>, ELifeStageCount> GetTickStages();
 };
 
 
