@@ -1,6 +1,7 @@
 #include "core/tick.hpp"
 #include "core/actor.hpp"
 #include "core/object.hpp"
+#include <algorithm>
 
 
 FTickFunction::FTickFunction(FTickFunction&& r) noexcept
@@ -58,7 +59,7 @@ const TickManager* FTickFunction::GetManager() const
 { return manager; }
 
 bool FTickFunction::operator==(const FTickFunction& r) const
-{
+{	//TODO:: is that correct?
 	auto a =   callback.target<void*>();
 	auto b = r.callback.target<void*>();
 	return a == b;
@@ -158,7 +159,12 @@ const TickManagerUtiles::Iterator TickManagerUtiles::FSlice::end() const
 
 
 
-bool TickManagerUtiles::FBacket::IsEmpty(ETickPhase phase, ETickType type) const
+bool TickManagerUtiles::FBucket::IsEmpty() const
+{
+	return functions.size();
+}
+
+bool TickManagerUtiles::FBucket::IsEmpty(ETickPhase phase, ETickType type) const
 {
 	for (auto&& function : functions)
 	{
@@ -166,24 +172,28 @@ bool TickManagerUtiles::FBacket::IsEmpty(ETickPhase phase, ETickType type) const
 			&& function->GetType() == type
 			&& function->GetActive())
 		{
-			return true;
+			return false;
 		}
 	}
-	return this;
+	return true;
 }
 
-TickManagerUtiles::FSlice TickManagerUtiles::FBacket::Slice(ETickPhase phase, ETickType type)
-{ return FSlice(functions, phase, type); }
-
-const TickManagerUtiles::FSlice TickManagerUtiles::FBacket::Slice(ETickPhase phase, ETickType type) const
+TickManagerUtiles::FSlice TickManagerUtiles::FBucket::Slice(ETickPhase phase, ETickType type)
 { 
+	return FSlice(functions, phase, type); 
+}
+
+const TickManagerUtiles::FSlice TickManagerUtiles::FBucket::Slice(ETickPhase phase, ETickType type) const
+{  
 	return FSlice(*const_cast<TickManagerUtiles::SList*>(&functions), phase, type); 
 }
 
-void TickManagerUtiles::FBacket::AddFunction(FTickFunction& tick)
-{ functions.emplace_back(&tick); }
+void TickManagerUtiles::FBucket::AddFunction(FTickFunction& tick)
+{ 
+	functions.emplace_back(&tick); 
+}
 
-void TickManagerUtiles::FBacket::RemFunction(FTickFunction& tick)
+void TickManagerUtiles::FBucket::RemFunction(FTickFunction& tick)
 {
 	functions.remove_if([&tick](const FTickFunction* l) { return *l == tick; });
 }
@@ -195,6 +205,7 @@ void TickManager::Assign(Object& object, FTickFunction& tick)
 {
 	if (auto* actor = object.GetActor())
 	{
+		std::shared_lock _(mu);
 		buckets[actor].AddFunction(tick);
 	}
 }
@@ -203,6 +214,7 @@ void TickManager::Remove(Object& object, FTickFunction& tick)
 {
 	if (auto* actor = object.GetActor())
 	{
+		std::shared_lock _(mu);
 		auto pos = buckets.find(actor);
 		auto end = buckets.end();
 		if (pos == end)
@@ -219,13 +231,33 @@ const TickManager::SBuckets& TickManager::GetBuckets() const
 { return buckets; }
 
 TickManager::TickManager()
-	: hits(60 * 10)
+	: hits(600)
 {}
 
 void TickManager::Tick()
 {
 	if (hits.Hit())
-	{
-
+	{ //!^ it's time to vacuum the tick table
+		std::scoped_lock _(mu);
+		for (auto&& [actor, bucket] : buckets)
+		{
+			if (!bucket.IsEmpty())
+			{
+				continue;
+			}
+			buckets.erase(actor);
+		}
 	}
 }
+
+void TickManager::lock()
+{ mu.lock(); }
+
+void TickManager::unlock()
+{ mu.unlock(); }
+
+void TickManager::lock_shared()
+{ mu.lock_shared(); }
+
+void TickManager::unlock_shared()
+{ mu.unlock_shared(); }

@@ -12,9 +12,8 @@ if (POLICY CMP0079)
 include("cmake/setup.cmake")
 include("cmake/gremlin/gremlin.cmake")
 
-GN_option(GN_bDebug on)
+GN_option(GN_bDebug off)
 GN_option(GN_bTests on)
-GN_option(GN_bUnity off)
 GN_option(GN_vcpkg_vcpkgRoot "")
 
 GN_Init()

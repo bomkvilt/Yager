@@ -47,10 +47,12 @@ TEST_F(pool_tests, simple)
 	using namespace threading;
 
 	std::atomic_int outs = 0;
+	auto k = false;
 	auto a = FLambdaTask::New([&]() { ++outs; });
 	auto b = FLambdaTask::New([&]() { ++outs; });
 	auto c = FLambdaTask::New([&]() { ++outs; });
 	auto e = FLambdaTask::New([&]() { cv.notify_one(); });
+	c->SetOnDone([&]() { k = true; });
 
 	a->Next(e);
 	b->Next(e);
@@ -67,6 +69,7 @@ TEST_F(pool_tests, simple)
 	cv.wait(lk);
 
 	EXPECT_EQ(outs, 3);
+	EXPECT_TRUE(k);
 }
 
 TEST_F(pool_tests, stress_termination)

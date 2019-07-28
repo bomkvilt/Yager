@@ -17,6 +17,7 @@ namespace threading
 	struct FTask : public boost::noncopyable
 	{
 		using ptr = std::unique_ptr<FTask>;
+		using event = std::function<void()>;
 	
 	public:
 		virtual void Run(IThreadpool& pool) = 0;
@@ -35,12 +36,15 @@ namespace threading
 
 		int NPrev() const;
 		int NNext() const;
+
+		void SetOnDone(event event);
 		
 	private:
 		friend class Threadpool;
 
 		std::vector<FTask*> nexts;	//!< next comming tasks
 		std::atomic_int prev = 0;	//!< previous tasks
+		event onDone;				//!< on task done event
 
 		void OnPrevDone(); //!< a previous task has been complitted
 		void OnFinished(); //!< the task has boon finished

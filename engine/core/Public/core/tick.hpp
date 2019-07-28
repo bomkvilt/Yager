@@ -2,6 +2,7 @@
 #define CORE_TICK_HPP
 
 #include <functional>
+#include <shared_mutex>
 #include <boost/noncopyable.hpp>
 #include "common/hit_timer.hpp"
 #include "core/core_types.hpp"
@@ -26,28 +27,32 @@ private:
 	Object*		 object		= nullptr;					//!< tick owner (component, module, actor)
 
 public: 
-	FTickFunction() noexcept = default;					//!< create default empty function
-	FTickFunction(FTickFunction&& r) noexcept;			//!< noncopiable => move sematics
-	~FTickFunction();									//!< unregister self
+	FTickFunction() noexcept = default;			//!< create default empty function
+	FTickFunction(FTickFunction&& r) noexcept;	//!< noncopiable => move sematics
+	~FTickFunction();							//!< unregister self
 	
 	template<typename CLB>								
 	void Bind(Object* target, CLB function) noexcept	//!< bind the momber function as a tick
-	{ DoBind(target, std::bind(function, target)); } 
+	{ 
+		DoBind(target, std::bind(function, target)); 
+	}
 
-	void Tick(FReal deltaTime, ETickPhase phase);		//!< execute the tick
+	void Tick(FReal deltaTime, ETickPhase phase);	//!< execute the tick
 	
-	void SetManager(TickManager* newManager);			//!< set the manager
-	void SetPhase(ETickPhase newState);					//!< set the phase flag
-	void SetType(ETickType newState);					//!< set the privasy flag
-	void SetActive(bool newState);						//!< set the bActive flag
-
-	bool       GetActive() const;						//!< get the bActive flag
-	ETickPhase GetPhase () const;						//!< get the phase flag
-	ETickType  GetType  () const;						//!< get the prvacy flag
-		  TickManager* GetManager();					//!< get the manager
-	const TickManager* GetManager() const;				//!< get the manager
-
 	bool operator==(const FTickFunction& r) const;
+
+public:
+	void SetManager(TickManager* newManager);	//!< set the manager
+	void SetPhase(ETickPhase newState);			//!< set the phase flag
+	void SetType(ETickType newState);			//!< set the privasy flag
+	void SetActive(bool newState);				//!< set the bActive flag
+
+public:
+	bool GetActive() const;					//!< get the bActive flag
+	ETickPhase GetPhase() const;			//!< get the phase flag
+	ETickType GetType() const;				//!< get the prvacy flag
+		  TickManager* GetManager();		//!< get the manager
+	const TickManager* GetManager() const;	//!< get the manager
 
 private:
 	void DoBind(Object* target, SCallback function);
@@ -58,22 +63,15 @@ private:
 
 namespace TickManagerUtiles
 {
-	enum class EEntery
-	{
-		  eActor		= 0
-		, eModule		= 1
-		, eComponent	= 2
-	};
-
 	using SList = std::list<FTickFunction*>;	//!< container with non-invalidateable iterators
 
 	class Iterator
-	{
+	{ //!^ iterator that selects specific tick functions
 	private:
-		SList::iterator pos;	//!< 
-		SList::iterator end;	//!< 
-		ETickPhase phase;		//!< selected tick phase
-		ETickType  type;		//!< selected tick type
+		SList::iterator pos;							//!< 
+		SList::iterator end;							//!< 
+		ETickPhase phase = ETickPhase::ePostPhysics;	//!< selected tick phase
+		ETickType  type  = ETickType::ePublic;			//!< selected tick type
 
 	public:
 		Iterator() = default;
@@ -91,7 +89,7 @@ namespace TickManagerUtiles
 
 
 	struct FSlice
-	{
+	{ //!^ lazy container with tick function search params
 	private:
 		SList&	   list;	//!< assigned bucket
 		ETickPhase phase;	//!< selected tick phase
@@ -107,12 +105,13 @@ namespace TickManagerUtiles
 	};
 
 
-	struct FBacket final : boost::noncopyable
-	{
+	struct FBucket final : boost::noncopyable
+	{ //!^ list of functions
 	private:
 		SList functions;	//!< assigned tick functions
 		
 	public:
+		bool IsEmpty() const;
 		bool IsEmpty(ETickPhase phase, ETickType type) const;
 		      FSlice Slice(ETickPhase phase, ETickType type);
 		const FSlice Slice(ETickPhase phase, ETickType type) const;
@@ -133,7 +132,7 @@ Requirements:
 class TickManager final : boost::noncopyable
 {
 public:
-	using SBuckets = std::map<Actor*, TickManagerUtiles::FBacket>;
+	using SBuckets = std::map<Actor*, TickManagerUtiles::FBucket>;
 	void Assign(Object& object, FTickFunction& tick);	//!< assign the tick function
 	void Remove(Object& object, FTickFunction& tick);	//!< remove the tick funciton 
 	const SBuckets& GetBuckets() const;
@@ -141,7 +140,13 @@ public:
 	TickManager();
 	void Tick();	//!< perform internal steps and garbage collection | Note: must be called onese a circule
 
+	void lock();
+	void unlock();
+	void lock_shared();
+	void unlock_shared();
+
 private:
+	std::shared_mutex mu;
 	SBuckets buckets;
 	HitTimer hits;
 };

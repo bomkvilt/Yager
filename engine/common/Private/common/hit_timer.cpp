@@ -19,7 +19,7 @@ bool HitTimer::Hit(size_t count)
 {
 	if (hits += count; hits >= required)
 	{
-		hits -= required;
+		hits = 0;
 		return true;
 	}
 	else return false;

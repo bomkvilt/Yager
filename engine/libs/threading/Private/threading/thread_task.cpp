@@ -53,6 +53,11 @@ namespace threading
 		return int(nexts.size());
 	}
 
+	void FTask::SetOnDone(event event)
+	{
+		onDone = event;
+	}
+
 	void FTask::OnPrevDone()
 	{
 		--prev;
@@ -63,6 +68,11 @@ namespace threading
 		for (auto* next : nexts)
 		{
 			next->OnPrevDone();
+		}
+		
+		if (onDone)
+		{
+			onDone();
 		}
 	}
 

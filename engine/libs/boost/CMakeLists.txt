@@ -11,9 +11,9 @@ find_package(Boost REQUIRED
     regex)
 
 
-GN_Unit( boost
+GN_Unit(boost
     Libs            ${Boost_LIBRARIES}
     Public          ${Boost_INCLUDE_DIR}
     Definitions     -DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB ${Boost_LIB_DIAGNOSTIC_DEFINITIONS}
-    Mode            "lib"
-    bFlat           on)
+    bFlat
+)

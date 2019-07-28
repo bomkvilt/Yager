@@ -13,10 +13,10 @@ int main()
 	auto sim = Simulation::New();
 	sim->OnConstructed();
 	sim->OnBeginPlay();
-
-	using namespace std::chrono_literals;
-	std::this_thread::sleep_for(2s);
-
+	{
+		using namespace std::chrono_literals;
+		std::this_thread::sleep_for(1s);
+	}
 	sim->OnEndPlay();
 	sim->OnDestruction();
 }

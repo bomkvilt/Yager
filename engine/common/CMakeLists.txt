@@ -1,4 +1,4 @@
-GN_Unit( common
+GN_Unit(common
     Units 
         math
-    )
+)

@@ -28,18 +28,16 @@ public: //~~~~~~~~~~~~~~| << ILifecycle
 	virtual void OnDestruction() override;
 
 private: //~~~~~~~~~~~~~~| ticks
-	using SRealTime = std::chrono::duration<FReal>;
 	using SClock = std::chrono::system_clock;
-	using SStep  = std::function<void()>;
-	using STime  = SClock::time_point;
+	using STime = SClock::time_point;
 	
 	std::tuple<threading::FTask::ptr, threading::FTask::ptr> CreateNext(ETickPhase phase);
+	void AddTask(threading::FTask::ptr&& task);
 	void DoTick();
 
 private: 
 	std::atomic_bool bActive = true;
-	std::atomic_int  ntasks = 0;
-	SStep onTick;
+	std::atomic_int ntasks = 0;
 
 	TickManager ticks;			//!< tick manager
 	STime time_current;			//!< real time point

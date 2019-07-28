@@ -16,7 +16,7 @@ void Simulation::OnConstructed()
 void Simulation::OnBeginPlay()
 {	/// start tick circule
 	using namespace threading;
-	IThreadpool::Get().AddTask(FLambdaTask::New([this]() { DoTick(); ++ntasks; }));
+	AddTask(FLambdaTask::New([this]() { DoTick(); }));
 }
 
 void Simulation::OnPause()
@@ -40,18 +40,19 @@ void Simulation::OnDestruction()
 std::tuple<threading::FTask::ptr, threading::FTask::ptr> Simulation::CreateNext(ETickPhase phase)
 {
 	using namespace threading;
+	std::shared_lock _(ticks);
 	auto& buckets = ticks.GetBuckets();
 	/// get private ticks
 	auto privatetasks = FTasks::New();
 	for (auto&& [actor, bucket] : buckets)
 	{
 		auto type = ETickType::ePrivate;
-		if (bucket.IsEmpty(phase, type))
+		if (!bucket.IsEmpty(phase, type))
 		{
 			auto slice = bucket.Slice(phase, type);
 			privatetasks->AddTask(FLambdaTask::New([slice, phase, this]()
-			{
-				for (auto& task : slice)
+			{	//TODO:: add a check that only actor can register his ticks
+				for (auto&& task : slice)
 				{
 					task.Tick(time_delta, phase);
 				}
@@ -59,8 +60,10 @@ std::tuple<threading::FTask::ptr, threading::FTask::ptr> Simulation::CreateNext(
 		}
 	}
 	/// get public ticks
-	auto publictasks = FLambdaTask::New([&buckets, phase, this]()
+	auto publictasks = FLambdaTask::New([phase, this]()
 	{
+		std::shared_lock _(ticks);
+		auto& buckets = ticks.GetBuckets();
 		auto type = ETickType::ePublic;
 		for (auto&& [owner, bucket] : buckets)
 		{
@@ -74,23 +77,28 @@ std::tuple<threading::FTask::ptr, threading::FTask::ptr> Simulation::CreateNext(
 	return { std::move(publictasks), std::move(privatetasks) };
 }
 
+void Simulation::AddTask(threading::FTask::ptr&& task)
+{
+	using namespace threading;
+	task->SetOnDone([this]() { --ntasks; });
+	IThreadpool::Get().AddTask(std::move(task));
+	++ntasks;
+}
+
 void Simulation::DoTick() //TODO:: substruct tick time avg error
 {
-	{	/// break the circule
-		if (--ntasks; !bActive)
-		{
-			return;
-		}
+	if (!bActive)
+	{	/// terminate the simulation
+		return;
 	}
 	{	/// sleep unil the tick period end and updte time
 		using namespace std::chrono_literals;
-		static const auto s1 = std::chrono::duration_cast<SRealTime>(1s);
 
 		auto time_step   = 1s / config.fps;
 		auto time_before = time_current;
 		{	/// time passed since a last call
-			auto      time_now   = SClock::now();
-			SRealTime time_spent = time_now - time_current;
+			auto time_now   = SClock::now();
+			auto time_spent = time_now - time_current;
 			/// sleep if required
 			if (time_spent < time_step)
 			{
@@ -100,7 +108,7 @@ void Simulation::DoTick() //TODO:: substruct tick time avg error
 		}
 		{	/// update a current time
 			time_current = SClock::now();
-			time_delta   = std::chrono::duration_cast<SRealTime>(time_current - time_before) / 1s;
+			time_delta   = std::chrono::duration_cast<std::chrono::microseconds>(time_current - time_before).count() / 1e6f;
 			/// update simulation time
 			time_simulation += time_delta;
 
@@ -124,20 +132,23 @@ void Simulation::DoTick() //TODO:: substruct tick time avg error
 			{ 
 				tasks.back()->Next(publicTasks);
 			}
-			privateTasks->Next(publicTasks);
-			tasks.emplace_back(std::move(privateTasks));
+			publicTasks->Next(privateTasks);
 			tasks.emplace_back(std::move(publicTasks));
+			tasks.emplace_back(std::move(privateTasks));
 		}
 		/// next cirule
 		{
-			auto tickTask = FLambdaTask::New([this]() { DoTick(); ++ntasks; });
-			tasks.back()->Next(tickTask);
+			auto tickTask = FLambdaTask::New([this]() { DoTick(); });
+			if (tasks.size())
+			{
+				tasks.back()->Next(tickTask);
+			}
 			tasks.emplace_back(std::move(tickTask));
 		}
 		/// push tasks
 		for (auto& task : tasks)
 		{
-			IThreadpool::Get().AddTask(std::move(task));
+			AddTask(std::move(task));
 		}
 	}
 }
