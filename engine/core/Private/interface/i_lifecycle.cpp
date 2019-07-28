@@ -1,5 +1,6 @@
 #include "interface/ilifecycle.hpp"
 
+
 ILifecycle::~ILifecycle()
 {
 	if (stage != ELifeStage::eInDestroy)

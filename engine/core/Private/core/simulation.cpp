@@ -142,10 +142,11 @@ void Simulation::DoTick() //TODO:: substruct tick time avg error
 		using namespace threading;
 
 		static const auto tickStages = GetTickStages();
+		static const auto tickPhases = ETickPhaseList();
 
 		/// create and link tasks
 		std::vector<FTask::ptr> tasks;
-		for (auto phase : ETickPhaseList())
+		for (auto phase : tickPhases)
 		{
 			if (!tickStages[(UInt8)GetLifeStage()][(UInt8)phase])
 			{
