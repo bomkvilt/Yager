@@ -1,11 +1,13 @@
 #include "interface/ilifecycle.hpp"
+#include <iostream>
 
 
 ILifecycle::~ILifecycle()
 {
 	if (stage != ELifeStage::eInDestroy)
-	{
-		throw std::runtime_error("incorrect in-destructor lifecycle stage: '" + StageToName(stage) + "'");
+	{	//TODO:: use log
+		std::cerr << "incorrect in-destructor lifecycle stage: '" + StageToName(stage) + "'";
+		std::terminate();
 	}
 }
 
