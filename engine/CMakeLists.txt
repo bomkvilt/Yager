@@ -5,4 +5,5 @@ GN_Subprojects(
     libs/math
     common
     core
+    framework
     )
