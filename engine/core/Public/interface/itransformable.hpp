@@ -1,5 +1,5 @@
-#ifndef CORE_WORLD_OBJECT_HPP
-#define CORE_WORLD_OBJECT_HPP
+#ifndef CORE_ITRANSFORMABLE_HPP
+#define CORE_ITRANSFORMABLE_HPP
 
 #include "common.hpp"
 #include "core/types.hpp"
@@ -22,4 +22,4 @@ public:
 };
 
 
-#endif //!CORE_WORLD_OBJECT_HPP
+#endif //!CORE_ITRANSFORMABLE_HPP

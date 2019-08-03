@@ -1,15 +1,28 @@
 #include "threading/thread_impl.hpp"
 
+#include <iostream>
+
 
 namespace threading
 {
+	Threadpool::~Threadpool()
+	{
+		bAlive = false;
+		while (nthreads)
+		{
+			std::this_thread::yield();
+		}
+	}
+	
 	void Threadpool::Construct(FThreadingConfig newConfig)
 	{
+		auto& config = globalStorage.config;
+
 		if (bConfig)
 		{
 			throw std::runtime_error("Threadpull is already configured");
 		}
-		else config = newConfig;
+		else globalStorage.config = newConfig;
 
 		// fix thread count
 		if (!config.threads)
@@ -25,40 +38,45 @@ namespace threading
 		}
 	}
 
-	//Threadpool::~Threadpool()
-	//{
-	//	/*bAlive = false;
-	//	while (nthreads)
-	//	{
-	//		std::this_thread::yield();
-	//	}*/
-	//}
-
 	void Threadpool::AddTask(FTask::ptr&& task)
 	{
 		auto& storage = GetLocalStorage();
-		storage.tasks.Push(std::move(task));
+		if (storage.bWorkerThread)
+		{
+			storage.tasks.push(std::move(task));
+			if (storage.tasks.size() > storage.config.tls_overload)
+			{ 
+				FlushLocalBuffer();
+			}
+			return;
+		}
+		globalStorage.tasks.enqueue(std::move(task));
 	}
 
 	void Threadpool::Worker()
 	{
-		SVector localTasks;
+		GetLocalStorage().bWorkerThread = true;
+
 		while (bAlive)
 		{
-			if (!Handle(localTasks))
+			if (!Handle())
 			{ 
-				std::this_thread::yield(); 
+				using namespace std::chrono_literals;
+				std::this_thread::sleep_for(3us);
 			}
 		}
 		--nthreads;
 	}
 
-	bool Threadpool::Handle(SVector& localTasks)
+	bool Threadpool::Handle()
 	{
-		if (GetTasks(localTasks))
+		if (FillLocalStorage())
 		{	/// execute
-			for (auto& task : localTasks)
+			auto& storage = GetLocalStorage();
+			while (storage.tasks.size())
 			{
+				auto task = std::move(storage.tasks.front());
+				storage.tasks.pop();
 				task->Run(*this);
 				task->OnFinished();
 			}
@@ -67,72 +85,51 @@ namespace threading
 		return false;
 	}
 
-	bool Threadpool::GetTasks(SVector& localTasks)
+	bool Threadpool::FillLocalStorage()
 	{
-		localTasks.clear();
+		auto& storage = GetLocalStorage();
+		auto size = storage.tasks.size();
+		auto max  = storage.config.tls_capacity;
 		
-		/// lock a pool's task list
-		std::scoped_lock _(tasks.tasks_mu);
-		
-		/// move tasks from a global storage
-		auto pos = tasks.tasks.begin();
-		auto end = tasks.tasks.end();
-		while (pos != end)
-		{	
-			auto&& ptr = *pos;
-			if (ptr->NPrev())
-			{
-				++pos;
-				continue;
-			}
-
-			localTasks.push_back(std::move(ptr));
-			pos = tasks.tasks.erase(pos);
-
-			if (localTasks.size() == config.localThreadStorage)
-			{
-				return true;
-			}
+		FlushLocalBuffer();
+		if (size >= max)
+		{
+			return true;
 		}
 
-		/// fiil the glbal tasks storage in
-		if (localTasks.size() == 0)
-		{	/// lock lockal storages globaly. | \note: it's elements are non-blocked yet
-			std::scoped_lock _(localStorages_mu);
-			for (auto&& [tid, ttasks] : localStorages)
-			{	/// move all elements to the global list
-				ttasks.tasks.Flush(tasks);
+		auto task = FTask::ptr();
+		while (storage.tasks.size() < max)
+		{
+			if (globalStorage.tasks.try_dequeue(task))
+			{
+				storage.tasks.push(std::move(task));
 			}
+			else break;
 		}
-		return localTasks.size();
+		return storage.tasks.size();
+	}
+
+	bool Threadpool::FlushLocalBuffer()
+	{
+		auto& storage = GetLocalStorage();
+		if (storage.tasks.size() < storage.config.tls_overload)
+		{
+			return false;
+		}
+
+		auto max = storage.config.tls_capacity;
+		while (storage.tasks.size() > max)
+		{
+			auto task = std::move(storage.tasks.front());
+			storage.tasks.pop();
+			globalStorage.tasks.enqueue(std::move(task));
+		}
+		return true;
 	}
 
 	Threadpool::FLocalStorage& Threadpool::GetLocalStorage()
 	{
-		auto tid = threading::GetThreadID();
-		auto pos = localStorages.find(tid);
-		auto end = localStorages.end();
-		if (pos == end)
-		{
-			std::scoped_lock _(localStorages_mu);
-			return localStorages[tid];
-		}
-		return pos->second;
-	}
-
-	void Threadpool::SList::Push(FTask::ptr&& task)
-	{
-		std::scoped_lock _(tasks_mu);
-		tasks.push_back(std::move(task));
-	}
-
-	void Threadpool::SList::Flush(SList& r)
-	{
-		std::scoped_lock _(tasks_mu);
-		for (auto& task : tasks)
-		{
-			r.tasks.emplace_back(std::move(task));
-		}
-		tasks.clear();
+		thread_local static auto storage = FLocalStorage();
+		return storage;
 	}
 }

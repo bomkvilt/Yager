@@ -1,19 +1,20 @@
-#ifndef CORE_TICK_HPP
-#define CORE_TICK_HPP
+#ifndef CORE_WORLD_TICKS_HPP
+#define CORE_WORLD_TICKS_HPP
 
 #include <functional>
 #include <shared_mutex>
 #include <boost/noncopyable.hpp>
+
 #include "common/hit_timer.hpp"
 #include "core/types.hpp"
+#include "threading/thread_task.hpp"
 
 /**/ class TickManager;
 /**/ class Object;
-/**/ class Actor;
+
 
 
 /** Tick function binder
- *
  */
 struct FTickFunction final : boost::noncopyable
 {	
@@ -27,14 +28,17 @@ private:
 	Object*		 object		= nullptr;					//!< tick owner (component, module, actor)
 
 public: 
-	FTickFunction() noexcept = default;			//!< create default empty function
+	FTickFunction() noexcept;					//!< create default empty function (current world assigned)
 	FTickFunction(FTickFunction&& r) noexcept;	//!< noncopiable => move sematics
-	~FTickFunction();							//!< unregister self
+	~FTickFunction() noexcept;					//!< unregister self
 	
-	template<typename CLB>								
-	void Bind(Object* target, CLB function) noexcept	//!< bind the momber function as a tick
+	/** Bind binds the object's method to an assigned tick manager
+	 * \note: Don't use the function in a constructor
+	 */
+	template<typename F>								
+	void Bind(Object* target, F function) noexcept
 	{ 
-		DoBind(target, std::bind(function, target)); 
+		DoBind(target, std::bind(function, target, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3)); 
 	}
 
 	void Tick(FReal deltaTime, ETickPhase phase);	//!< execute the tick
@@ -121,35 +125,46 @@ namespace TickManagerUtiles
 }
 
 
-/* Tick system.
-Requirements:
-- parallel execution support (per actor handlers must be provided)					-> @see FBucket
-- consistency		(one actor's ticks must be executed lineary; one by one)		-> ???
-- atomacy			(during execution tick functions can be changed)				-> ???
-- component first	(actor component's ticks must be executed befor actor's ones)	-> @see FBucket.AddFunction()
-- private/public tick phases support (manager must provide speciasised methods)		-> ???
- */
 class TickManager final : boost::noncopyable
 {
+private: //---| 
+	HitTimer hits;
+
 public:
-	using SBuckets = std::map<Actor*, TickManagerUtiles::FBucket>;
-	void Assign(Object& object, FTickFunction& tick);	//!< assign the tick function
-	void Remove(Object& object, FTickFunction& tick);	//!< remove the tick funciton 
-	const SBuckets& GetBuckets() const;
-
 	TickManager();
-	void Tick();	//!< perform internal steps and garbage collection | Note: must be called onese a circule
+	void Tick();
 
-	void lock();
-	void unlock();
-	void lock_shared();
-	void unlock_shared();
+public: //----| block.events
+	using SEvent  = std::function<void(ETickPhase)>;
+	using SEvents = std::array<std::vector<SEvent>, ETickPhaseCount>;
 
 private:
-	std::shared_mutex mu;
+	SEvents events;
+
+	void CallPhaseEvents(ETickPhase phase);
+
+public:
+	void AddEvent(ETickPhase phase, SEvent event);
+	void DelEvent(ETickPhase phase, SEvent event);
+
+private: //---| block.ticks
+	using SBuckets = std::map<Object*, TickManagerUtiles::FBucket>;
+
 	SBuckets buckets;
-	HitTimer hits;
+	
+public:
+	using STaskPair = std::pair<threading::FTask::ptr, threading::FTask::ptr>;
+
+	void Assign(Object& object, FTickFunction& tick);
+	void Remove(Object& object, FTickFunction& tick);
+	
+	/// GetTasks returns {public, private} task backets
+	/// \note: events are already injected here (public)
+	STaskPair GetTasks(ETickPhase phase, FReal ds);
+
+private: //---| internal
+	std::shared_mutex mu;
 };
 
 
-#endif //!CORE_TICK_HPP
+#endif //!CORE_WORLD_TICKS_HPP

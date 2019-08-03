@@ -1,5 +1,7 @@
 #include "core/simulation.hpp"
+#include "core/world.hpp"
 #include "threading/thread_pull.hpp"
+
 
 
 int main()
@@ -10,12 +12,12 @@ int main()
 	threading::IThreadpool::Get().Construct(conf);
 
 	// simulaition mock
-	auto sim = Simulation::New();
+	auto sim = World::New();
 	sim->OnConstructed();
 	sim->OnBeginPlay();
 	{
 		using namespace std::chrono_literals;
-		std::this_thread::sleep_for(1s);
+		std::this_thread::sleep_for(10s);
 	}
 	sim->OnEndPlay();
 	sim->OnDestruction();

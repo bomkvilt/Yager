@@ -1,8 +1,19 @@
-#include "core/tick.hpp"
-#include "core/actor.hpp"
 #include "core/object.hpp"
+#include "core/world.hpp"
+#include "core/world_ticks.hpp"
+#include "core/errors.hpp"
+#include "threading/thread_context.hpp"
 #include <algorithm>
 
+
+
+FTickFunction::FTickFunction() noexcept
+	: bActive(false)
+	, manager(&ThreadContext::GetWorld()->GetTickManager())
+	, object(nullptr)
+	, phase(ETickPhase::eGameLogic)
+	, type(ETickType::ePublic)
+{ AssignSelf(); }
 
 FTickFunction::FTickFunction(FTickFunction&& r) noexcept
 	: callback(r.callback)
@@ -59,7 +70,7 @@ const TickManager* FTickFunction::GetManager() const
 { return manager; }
 
 bool FTickFunction::operator==(const FTickFunction& r) const
-{	//TODO:: is that correct?
+{
 	auto a =   callback.target<void*>();
 	auto b = r.callback.target<void*>();
 	return a == b;
@@ -69,12 +80,16 @@ void FTickFunction::DoBind(Object* target, SCallback function)
 {
 	if (manager)
 	{
+		if (object->GetLifeStage() != ELifeStage::eConstructed)
+		{
+			throw InallowedLifeStage();
+		}
 		RemoveSelf();
 		callback = function;
-		object   = target;
+		object = target;
 		AssignSelf();
 	}
-	else throw std::runtime_error("empty manager is not allowed");
+	else throw NoManagerIsPresented();
 }
 
 void FTickFunction::AssignSelf()
@@ -201,21 +216,54 @@ void TickManagerUtiles::FBucket::RemFunction(FTickFunction& tick)
 
 
 
+TickManager::TickManager()
+	: hits(600)
+{}
+
+void TickManager::AddEvent(ETickPhase phase, SEvent event)
+{
+	events[(UInt8)phase].push_back(event);
+}
+
+void TickManager::DelEvent(ETickPhase phase, SEvent event)
+{
+	auto& list = events[(UInt8)phase];
+	auto pos = list.begin();
+	auto end = list.end();
+	for (; pos != end; ++pos)
+	{
+		if (pos->target<void*>() != event.target<void*>())
+		{
+			continue;
+		}
+		list.erase(pos);
+		return;
+	}
+}
+
+void TickManager::CallPhaseEvents(ETickPhase phase)
+{
+	for (auto& event : events[(UInt8)phase])
+	{
+		event(phase);
+	}
+}
+
 void TickManager::Assign(Object& object, FTickFunction& tick)
 {
-	if (auto* actor = object.GetActor())
+	if (auto* owner = object.GetOwner())
 	{
 		std::shared_lock _(mu);
-		buckets[actor].AddFunction(tick);
+		buckets[owner].AddFunction(tick);
 	}
 }
 
 void TickManager::Remove(Object& object, FTickFunction& tick)
 {
-	if (auto* actor = object.GetActor())
+	if (auto* owner = object.GetOwner())
 	{
 		std::shared_lock _(mu);
-		auto pos = buckets.find(actor);
+		auto pos = buckets.find(owner);
 		auto end = buckets.end();
 		if (pos == end)
 		{
@@ -227,37 +275,61 @@ void TickManager::Remove(Object& object, FTickFunction& tick)
 	}
 }
 
-const TickManager::SBuckets& TickManager::GetBuckets() const
-{ return buckets; }
+TickManager::STaskPair TickManager::GetTasks(ETickPhase phase, FReal ds)
+{
+	using namespace threading;
+	std::shared_lock _(mu);
+	
+	/// get private ticks
+	auto privatetasks = FTasks::New();
+	for (auto&& [actor, bucket] : buckets)
+	{
+		auto type = ETickType::ePrivate;
+		if (bucket.IsEmpty(phase, type))
+		{
+			continue;
+		}
 
-TickManager::TickManager()
-	: hits(600)
-{}
+		auto slice = bucket.Slice(phase, type);
+		privatetasks->AddTask(FLambdaTask::New([slice, ds, phase]()
+		{
+			for (auto&& task : slice)
+			{
+				task.Tick(ds, phase);
+			}
+		}));
+	}
+
+	/// get public ticks
+	auto publictasks = FLambdaTask::New([ds, phase, this]()
+	{
+		CallPhaseEvents(phase);
+		std::shared_lock _(mu);
+		auto type = ETickType::ePublic;
+		for (auto&& [owner, bucket] : buckets)
+		{
+			auto& slice = bucket.Slice(phase, type);
+			for (auto&& task : slice)
+			{
+				task.Tick(ds, phase);
+			}
+		}
+	});
+	return { std::move(publictasks), std::move(privatetasks) };
+}
 
 void TickManager::Tick()
 {
 	if (hits.Hit())
 	{ //!^ it's time to vacuum the tick table
 		std::scoped_lock _(mu);
-		for (auto&& [actor, bucket] : buckets)
+		for (auto&& [owner, bucket] : buckets)
 		{
 			if (!bucket.IsEmpty())
 			{
 				continue;
 			}
-			buckets.erase(actor);
+			buckets.erase(owner);
 		}
 	}
 }
-
-void TickManager::lock()
-{ mu.lock(); }
-
-void TickManager::unlock()
-{ mu.unlock(); }
-
-void TickManager::lock_shared()
-{ mu.lock_shared(); }
-
-void TickManager::unlock_shared()
-{ mu.unlock_shared(); }

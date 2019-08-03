@@ -13,8 +13,9 @@ namespace threading
 		return std::make_unique<FTasks>();
 	}
 
-	void FTasks::Run(IThreadpool& pool)
+	void FTasks::Run(IThreadpool& pool) noexcept
 	{
+		FTask::Run(pool);
 		for (auto& task : tasks)
 		{
 			if (hook)
@@ -43,27 +44,40 @@ namespace threading
 	//						  Task
 	//********************************************************
 
-	int FTask::NPrev() const
+	void FTask::Run(IThreadpool& pool) noexcept
+	{
+		if (onBegin)
+		{
+			onBegin();
+		}
+	}
+
+	int FTask::NPrev() const noexcept
 	{
 		return prev;
 	}
 
-	int FTask::NNext() const
+	int FTask::NNext() const noexcept
 	{
 		return int(nexts.size());
 	}
 
-	void FTask::SetOnDone(event event)
+	void FTask::SetOnBegin(event event) noexcept
+	{
+		onBegin = event;
+	}
+	
+	void FTask::SetOnDone(event event) noexcept
 	{
 		onDone = event;
 	}
 
-	void FTask::OnPrevDone()
+	void FTask::OnPrevDone() noexcept
 	{
 		--prev;
 	}
 
-	void FTask::OnFinished()
+	void FTask::OnFinished() noexcept
 	{
 		for (auto* next : nexts)
 		{
@@ -94,8 +108,9 @@ namespace threading
 		: lambda(run)
 	{}
 
-	void FLambdaTask::Run(IThreadpool& pool)
+	void FLambdaTask::Run(IThreadpool& pool) noexcept
 	{
+		FTask::Run(pool);
 		lambda(pool);
 	}
 }

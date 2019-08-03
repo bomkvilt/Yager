@@ -1,7 +1,12 @@
 #ifndef THREADING_THREAD_IMPL_HPP
 #define THREADING_THREAD_IMPL_HPP
 
+#include <vector>
+#include <deque>
+#include <queue>
 #include "threading/thread_pull.hpp"
+#include "concurrentqueue/concurrentqueue.h"
+
 
 
 namespace threading
@@ -9,60 +14,43 @@ namespace threading
 	class Threadpool final : public IThreadpool
 	{
 	public:
-		void Construct(FThreadingConfig newConfig);
-		
-		~Threadpool()
-		{
-			bAlive = false;
-			while (nthreads)
-			{
-				std::this_thread::yield();
-			}
-		}
+		~Threadpool();
 
+		void Construct(FThreadingConfig newConfig);
 		void AddTask(FTask::ptr&& task);
 
 	private:
-		/// << types
-		using SThreads	= boost::thread_group;
-		using SVector	= std::vector<FTask::ptr>;
+		using SThreads = boost::thread_group;
+		using SVector  = std::vector<FTask::ptr>;
 
-		struct SList : public boost::noncopyable
+		struct FLocalStorage : public boost::noncopyable
 		{
-			std::list<FTask::ptr>	tasks;
-			std::mutex				tasks_mu;
+			bool bWorkerThread = false;
+			FThreadingConfig config;
 
-			void Push(FTask::ptr&& task);
-			void Flush(SList& r);
+			std::queue<FTask::ptr> tasks;
 		};
 
-		enum { eAllign = 256 };
-		// enum { eAllign = std::hardware_destructive_interference_size };
-		struct alignas(eAllign) FLocalStorage : public boost::noncopyable
+		struct FGlobalStorage : public boost::noncopyable
 		{
-			SList tasks;
+			FThreadingConfig config;
+
+			moodycamel::ConcurrentQueue<FTask::ptr> tasks;
 		};
 
-		using SLocalMap = std::map<threading::ID, FLocalStorage>;
-
-		/// << threads
-		SThreads   threads;
-		SLocalMap  localStorages;
-		std::mutex localStorages_mu;
+		SThreads threads;
 		std::atomic_int nthreads = 0;
 
-		/// << tasks
-		SList tasks;
+		FGlobalStorage globalStorage;
 
-		/// << config
-		FThreadingConfig config;
 		std::atomic_bool bConfig = false;
 		std::atomic_bool bAlive  = true;
 
 	private:
 		void Worker();
-		bool Handle  (SVector& localTasks);
-		bool GetTasks(SVector& localTasks);
+		bool Handle();
+		bool FillLocalStorage();
+		bool FlushLocalBuffer();
 		FLocalStorage& GetLocalStorage();
 	};
 }

@@ -41,11 +41,6 @@ private:
 	std::atomic<ELifeStage> stage = ELifeStage::eNotInitialised;
 
 	void SetLifeStage(ELifeStage newStage);
-
-	
-	static constexpr std::array<std::array<bool, ELifeStageCount>, ELifeStageCount> MakeTranslatoinTable();
-
-	static std::string StageToName(ELifeStage stage);
 };
 
 

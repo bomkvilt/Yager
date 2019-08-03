@@ -20,12 +20,12 @@ namespace threading
 		using event = std::function<void()>;
 	
 	public:
-		virtual void Run(IThreadpool& pool) = 0;
+		virtual void Run(IThreadpool& pool) noexcept;
 
 		virtual ~FTask() = default;
 
 		template<typename Ptr>
-		void Next(Ptr& task) //!< Set a next comming task
+		void Next(Ptr& task) noexcept //!< Set a next comming task
 		{
 			if (task)
 			{
@@ -34,20 +34,22 @@ namespace threading
 			}
 		}
 
-		int NPrev() const;
-		int NNext() const;
+		int NPrev() const noexcept;
+		int NNext() const noexcept;
 
-		void SetOnDone(event event);
+		void SetOnBegin(event event) noexcept;
+		void SetOnDone (event event) noexcept;
 		
 	private:
 		friend class Threadpool;
 
 		std::vector<FTask*> nexts;	//!< next comming tasks
 		std::atomic_int prev = 0;	//!< previous tasks
+		event onBegin;				//!< on task started event
 		event onDone;				//!< on task done event
 
-		void OnPrevDone(); //!< a previous task has been complitted
-		void OnFinished(); //!< the task has boon finished
+		void OnPrevDone() noexcept; //!< a previous task has been complitted
+		void OnFinished() noexcept; //!< the task has boon finished
 	};
 
 	
@@ -59,7 +61,7 @@ namespace threading
 		static FTasks::ptr New();
 
 	public:
-		virtual void Run(IThreadpool& pool) override;
+		virtual void Run(IThreadpool& pool) noexcept override;
 		virtual void SetHook(FTask::ptr&& task); //!< set atask will be when all tasks are finished
 		virtual void AddTask(FTask::ptr&& task); //!< append a task
 
@@ -80,7 +82,7 @@ namespace threading
 	public:
 		FLambdaTask(std::function<void(IThreadpool&)> run);
 
-		virtual void Run(IThreadpool& pool) override;
+		virtual void Run(IThreadpool& pool) noexcept override;
 
 	protected:
 		std::function<void(IThreadpool&)> lambda;

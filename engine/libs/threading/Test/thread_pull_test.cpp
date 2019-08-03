@@ -6,7 +6,7 @@ struct pool_tests : testing::Test
 {
 	void SetUp() override
 	{
-		for (auto i : { 1, 2, 8 })
+		for (auto i : { 1, 2, 7 })
 		{
 			FThreadingConfig conf;
 			conf.threads = i;
@@ -19,23 +19,45 @@ struct pool_tests : testing::Test
 	std::map<int, FThreadingConfig>		 confs;
 	std::map<int, threading::Threadpool> pools;
 
-	int nstress = 1000;
+	int nstress = int(10e2);
 
-	void stress(threading::Threadpool& pool)
+	void stress(threading::Threadpool& pool, int threads)
 	{
-		std::condition_variable cv;
+		auto done = std::atomic_int(0);
+		auto perThread  = nstress   / threads;
+		auto totalCount = perThread * threads;
 
 		using namespace threading;
-		
-		for (auto i = 0; i < nstress; ++i)
-		{
-			pool.AddTask(FLambdaTask::New([&]() {}));
-		}
-		pool.AddTask(FLambdaTask::New([&]() { cv.notify_one(); }));
 
-		auto mu = std::mutex();
-		auto lk = std::unique_lock(mu);
-		cv.wait(lk);
+		for (int n = 0; n < threads; ++n)
+		{	// destribute taks per worker
+			auto buildLock = std::condition_variable();
+			pool.AddTask(FLambdaTask::New([&done, &buildLock, &pool, perThread]()
+			{	// spawn tasks
+				buildLock.notify_all();
+				for (auto i = 0; i < perThread; ++i)
+				{
+					pool.AddTask(FLambdaTask::New([&done]()
+					{
+						uint64_t a = 10;
+						for (auto i = 0; i < 300; ++i)
+						{
+							a *= a;
+						}
+						++done;
+					}));
+				}
+			}));
+			auto mu = std::mutex();
+			auto lk = std::unique_lock(mu);
+			buildLock.wait(lk);
+		}
+		
+		while (done < totalCount)
+		{
+			using namespace std::chrono_literals;
+			std::this_thread::sleep_for(1us);
+		}
 	}
 };
 
@@ -77,26 +99,29 @@ TEST_F(pool_tests, stress_termination)
 	// and we need to ensure that the object terminates as well
 	using namespace threading;
 
-	const auto times = 100;
+	const auto times = 30;
 	for (auto i = 0; i < times; ++i)
 	{
 		auto pool = Threadpool();
 		pool.Construct(confs[8]);
 	}
-	// assert = test haven't crash
+	// assert = test didn't crash
 }
 
 TEST_F(pool_tests, stress_1)
 {
-	stress(pools[1]);
+	stress(pools[1], 1);
+	// assert = test didn't crash
 }
 
 TEST_F(pool_tests, stress_2)
 {
-	stress(pools[2]);
+	stress(pools[2], 2);
+	// assert = test didn't crash
 }
 
-TEST_F(pool_tests, stress_8)
+TEST_F(pool_tests, stress_7)
 {
-	stress(pools[8]);
+	stress(pools[7], 7);
+	// assert = test didn't crash
 }
