@@ -23,6 +23,16 @@ class Object : public reflect::FArchived
 	, public ITicker
 	, public boost::noncopyable
 {
+public:
+	struct SerialisationFLags
+	{
+		Int8 bNet : 1;
+
+		SerialisationFLags()
+			: bNet(true)
+		{}
+	};
+
 public: //----| block.Lifecycle
 	virtual void OnConstructed() override;	//!< the object and it's owner are constructed
 	virtual void OnBeginPlay() override;	//!< the object was placed to a geme scene
@@ -43,16 +53,17 @@ private:
 public: //----| block.object
 	Object();
 
-public:
-	UID	GetUID() const;
+	SerialisationFLags serialisationFlags;
 
-	std::string	GetName() const;
-	
+public:
 	      Object* GetOwner();
 	const Object* GetOwner() const;
 
 	      World* GetWorld();
 	const World* GetWorld() const;
+
+	UID	        GetUID() const;
+	std::string	GetName() const;
 
 private:
 	UID	uid;			//!< worldwide uid
