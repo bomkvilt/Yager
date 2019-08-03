@@ -42,7 +42,7 @@ public: //----| block.lifecycle
 	virtual void OnDestruction() override;
 
 private: //---| internal
-	UNIQUE(ThreadContext::WorldContext) worldContext;
+	ThreadContext::WorldContext worldContext;
 	FWorldConfig config;
 
 	

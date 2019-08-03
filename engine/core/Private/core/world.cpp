@@ -42,10 +42,9 @@ UNIQUE(World) World::New()
 }
 
 World::World()
-	: worldContext(std::make_unique<ThreadContext::WorldContext>())
-	, objects(this)
+	: objects(this)
 {
-	worldContext->world = this;
+	worldContext.world = this;
 	ticks.AddEvent(ETickPhase::eInputParsing, [this](ETickPhase)
 	{
 		objects.InitNewObjects();
@@ -105,7 +104,7 @@ void World::AddTask(threading::FTask::ptr&& task)
 
 	task->SetOnBegin([this]()
 	{	//TODO: add a multibinding
-		ThreadContext::SetWorldContext(worldContext.get());
+		ThreadContext::SetWorldContext(&worldContext);
 	});
 	task->SetOnDone([this]()
 	{	//TODO: add a multibinding
