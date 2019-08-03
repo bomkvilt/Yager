@@ -70,12 +70,25 @@ private:
 	void NextLoop();
 
 private: //---| block.objects
-	
+
 	ObjectManager objects;
 
 public:
 	      ObjectManager& GetObjectManger();
 	const ObjectManager& GetObjectManager() const;
+
+private: //---| block.controllers
+
+	std::vector<WorldController*> controllers;
+
+public:
+	template<typename T>
+	T* NewController(ObjectInitialiser& init)
+	{
+		auto* ptr = objects.NewObject(init);
+		controllers.push_back(ptr);
+		return ptr;
+	}
 };
 
 
