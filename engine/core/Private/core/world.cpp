@@ -43,22 +43,19 @@ UNIQUE(World) World::New()
 
 World::World()
 	: worldContext(std::make_unique<ThreadContext::WorldContext>())
-	, lastUID(0)
+	, objects(this)
 {
 	worldContext->world = this;
 	ticks.AddEvent(ETickPhase::eInputParsing, [this](ETickPhase)
 	{
-		std::scoped_lock _(nonstartedObjects_mu);
-		for (auto* object : nonStartedObjects)
-		{
-			object->OnConstructed();
-			object->OnBeginPlay();
-		}
+		objects.InitNewObjects();
 	});
 }
 
 World::~World()
-{}
+{
+	objects.RemAllObjects();
+}
 
 
 void World::OnConstructed()
@@ -219,82 +216,12 @@ void World::NextLoop()
 	}
 }
 
-void World::RegisterObject(UNIQUE(Object)&& object)
+ObjectManager& World::GetObjectManger()
 {
-	auto* ptr = object.get();
-	{
-		std::scoped_lock _(createdObjects_mu, assignedObjects_mu);
-
-		createdObjects[ptr] = std::move(object);
-
-		if (auto owner = ptr->GetOwner())
-		{
-			assignedObjects[owner].push_back(ptr);
-		}
-	}
-	{
-		std::scoped_lock _(nonstartedObjects_mu);
-		nonStartedObjects.emplace_back(ptr);
-	}
+	return objects;
 }
 
-void World::RemoveObjects()
+const ObjectManager& World::GetObjectManager() const
 {
-	std::scoped_lock _(removedObjects_mu, createdObjects_mu);
-
-	auto pos = removedObjectsList.rbegin();
-	auto end = removedObjectsList.rend();
-	for (; pos != end; ++pos)
-	{
-		auto* object = *pos;
-		object->OnDestruction();
-		createdObjects.erase(object);
-	}
-	removedObjects.clear();
-	removedObjectsList.clear();
-}
-
-void World::DelObject(Object* object)
-{
-	struct FNode : public boost::noncopyable
-	{
-		Object* owner;
-		std::vector<Object*>::const_iterator pos;
-		std::vector<Object*>::const_iterator end;
-
-		FNode(Object* object, World* world)
-			: owner(object)
-		{
-			auto& vector = world->assignedObjects.find(object)->second;
-			pos = vector.begin();
-			end = vector.end();
-		}
-	};
-
-	std::scoped_lock _(removedObjects_mu, assignedObjects_mu);
-
-	auto nodes = std::stack<FNode>();
-	nodes.emplace(object, this);
-	
-	while (nodes.size() > 0)
-	{
-		auto& top = nodes.top();
-		if (top.pos == top.end)
-		{
-			top.owner->OnEndPlay();
-			removedObjects.insert(top.owner);
-			removedObjectsList.push_back(top.owner);
-			assignedObjects.erase(top.owner);
-			continue;
-		}
-		nodes.emplace(*(++top.pos), this);
-	}
-}
-
-bool World::IsValid(Object* object)
-{
-	std::shared_lock _(removedObjects_mu);
-	auto pos = removedObjects.find(object);
-	auto end = removedObjects.end();
-	return pos == end;
+	return objects;
 }

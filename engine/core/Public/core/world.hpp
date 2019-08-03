@@ -10,6 +10,7 @@
 
 #include "common.hpp"
 #include "core/types.hpp"
+#include "core/world_objects.hpp"
 #include "core/world_ticks.hpp"
 #include "core/object_initialiser.hpp"
 #include "config/world_Config.hpp"
@@ -69,51 +70,12 @@ private:
 	void NextLoop();
 
 private: //---| block.objects
-	/// storage of allocated objects
-	std::unordered_map<Object*, UNIQUE(Object)> createdObjects;
-	std::shared_mutex createdObjects_mu;
-
-	/// list of objects, assigned to another one
-	/// \note: if owner gets destroyed all assigned objects are destroyed too.
-	std::unordered_map<Object*, std::vector<Object*>> assignedObjects;
-	std::shared_mutex assignedObjects_mu;
-
-	/// objects marcked on to be destructed
-	/// \note: all depended objects will be destroyed in the same order they were created
-	std::unordered_set<Object*> removedObjects;
-	std::vector<Object*> removedObjectsList;
-	std::shared_mutex removedObjects_mu;
-
-	/// list of objects created but not initialied bu OnBeginPLay()
-	std::vector<Object*> nonStartedObjects;
-	std::shared_mutex nonstartedObjects_mu;
-
-	/// last used object unique id
-	std::atomic<UID> lastUID;
+	
+	ObjectManager objects;
 
 public:
-	/// NewObject creates a new object the world inside
-	/// \note: all required params must be sent with use of ThreadContext's initialisers
-	template<typename T>
-	T* NewObject(ObjectInitialiser& init)
-	{
-		init.world = this;
-		init.uid = ++lastUID;
-		ThreadContext::ScopeInit _(init);
-		auto ptr = std::make_unique<T>();
-		RegisterObject(std::move(ptr));
-		return ptr.get();
-	}
-
-	/// DelObject marks the object and all assigned once as deleted
-	/// \note: it removes the objects asyncronously
-	void DelObject(Object* object);
-
-	bool IsValid(Object* object);
-
-private:
-	void RegisterObject(UNIQUE(Object)&& object);
-	void RemoveObjects();
+	      ObjectManager& GetObjectManger();
+	const ObjectManager& GetObjectManager() const;
 };
 
 
